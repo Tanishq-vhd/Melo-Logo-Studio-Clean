@@ -8,7 +8,9 @@ const router = express.Router();
   Put your OpenAI key here ONLY for local testing.
   Later we will move it to environment variables.
 */
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const openai = new OpenAI({
+  apiKey: "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"
+});
 
 
 router.post("/image", async (req, res) => {
