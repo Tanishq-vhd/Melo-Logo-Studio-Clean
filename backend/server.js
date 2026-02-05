@@ -7,6 +7,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, ".env") });
+console.log("ENV CHECK:", {
+  MONGO_URI: process.env.MONGO_URI,
+});
 
 // ⬇️ NOW import everything else
 import express from "express";

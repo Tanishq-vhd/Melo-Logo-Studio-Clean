@@ -539,3 +539,170 @@ button {
   margin-top: 10px;
   font-size: 14px;
 }
+/* ===== GENERAL ===== */
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.pink {
+  color: #ff4da6;
+}
+
+/* ===== HERO ===== */
+.hero {
+  padding: 120px 24px;
+  text-align: center;
+  background: linear-gradient(180deg, #ffffff, #fff5fa);
+}
+
+.hero h1 {
+  font-size: 52px;
+  font-weight: 800;
+  max-width: 860px;
+  margin: auto;
+}
+
+.hero p {
+  margin: 20px auto;
+  color: #555;
+  max-width: 600px;
+}
+
+.hero input {
+  margin-top: 32px;
+  padding: 16px 20px;
+  width: 100%;
+  max-width: 560px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+}
+
+.primary-cta {
+  margin-top: 28px;
+  background: #ff4da6;
+  color: #fff;
+  padding: 16px 36px;
+  border-radius: 32px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===== EXPLORE ===== */
+.explore-page {
+  padding: 100px 24px;
+  text-align: center;
+}
+
+.logo-grid {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.logo-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.08);
+}
+
+.logo-card img {
+  width: 100%;
+  border-radius: 14px;
+}
+
+/* ===== FAQ ===== */
+.faq-section {
+  padding: 120px 24px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.faq-section h2 {
+  text-align: center;
+  font-size: 44px;
+  margin-bottom: 48px;
+}
+
+.faq-item {
+  border-bottom: 1px solid #eee;
+  padding: 24px 0;
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.faq-answer {
+  margin-top: 12px;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* ===== FREE AI ===== */
+.free-ai {
+  padding: 140px 24px;
+  text-align: center;
+}
+
+.stars {
+  color: #ff9f1c;
+  font-size: 18px;
+}
+
+.trusted {
+  font-size: 14px;
+  color: #555;
+}
+
+.free-ai h2 {
+  font-size: 48px;
+  font-weight: 800;
+}
+
+.desc {
+  max-width: 720px;
+  margin: 16px auto 32px;
+  color: #555;
+}
+
+.black-cta {
+  background: #000;
+  color: #fff;
+  padding: 18px 44px;
+  border-radius: 16px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.footer-links {
+  margin-top: 48px;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  font-size: 14px;
+}
+
+/* ===== SCROLL TO TOP ===== */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(0,0,0,.25);
+  z-index: 9999;
+}

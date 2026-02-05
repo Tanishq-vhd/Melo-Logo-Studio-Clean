@@ -9,11 +9,14 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Payment from "./pages/payment";
 import Success from "./pages/success";
+import Privacy from "./pages/Privacy";
+import TermsOfUse from "./pages/TermsOfUse";
+import AboutUs from "./pages/AboutUs";
 
 /* 🔐 Login required */
 const RequireAuth = ({ children }) => {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/signup" replace />;
+  return token ? children : <Navigate to="/signin" replace />;
 };
 
 /* 💳 Payment required */
@@ -28,18 +31,17 @@ function App() {
       <Navbar />
 
       <Routes>
-        {/* 🌍 Public landing page */}
+        {/* 🌍 Public */}
         <Route path="/" element={<Home />} />
+        <Route path="/privacy-policy" element={<Privacy />} />
+        <Route path="/terms-of-use" element={<TermsOfUse />} />
+        <Route path="/about" element={<AboutUs />} />
 
-        {/* 🔓 Auth pages */}
+        {/* 🔓 Auth */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
 
-        {/* 💳 Pricing → payment enforced */}
-       <Route path="/maxx" element={<Maxx />} />
-
-
-        {/* 💳 Payment page (login required only) */}
+        {/* 💳 Payment */}
         <Route
           path="/payment"
           element={
@@ -49,7 +51,29 @@ function App() {
           }
         />
 
-        {/* ✅ Success */}
+        {/* 🔒 Protected */}
+        <Route
+          path="/maxx"
+          element={
+            <RequireAuth>
+              <RequirePayment>
+                <Maxx />
+              </RequirePayment>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/melostudio"
+          element={
+            <RequireAuth>
+              <RequirePayment>
+                <Melostudio />
+              </RequirePayment>
+            </RequireAuth>
+          }
+        />
+
         <Route
           path="/success"
           element={
@@ -61,19 +85,7 @@ function App() {
           }
         />
 
-        {/* 🔒 AI Tools */}
-        <Route
-          path="/Melostudio"
-          element={
-            <RequireAuth>
-              <RequirePayment>
-                <Melostudio />
-              </RequirePayment>
-            </RequireAuth>
-          }
-        />
-
-        {/*  Fallback */}
+        {/* 🔁 ALWAYS LAST */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

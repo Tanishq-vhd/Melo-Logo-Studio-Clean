@@ -24,7 +24,7 @@ export default function Navbar() {
             alt="Melo"
             className="brand-logo"
           />
-          <span className="brand-name">Melo</span>
+          <span className="brand-name">melo</span>
         </Link>
 
         <nav className="nav-links">

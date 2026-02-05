@@ -55,7 +55,7 @@ export default function Maxx() {
       <section className="pricing-page">
         <h1 className="pricing-title">Choose your plan</h1>
         <p className="pricing-subtitle">
-          Start creating professional logos or get complete branding done for you
+          Start creating professional logos and get complete branding done for you
         </p>
 
         <div className="pricing-grid">

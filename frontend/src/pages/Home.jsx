@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import "./Explore.css";
 
 import beauty from "../assets/images/Beauty.jpg";
@@ -9,97 +11,86 @@ import food from "../assets/images/Food.jpg";
 import skincare from "../assets/images/skincare.jpg";
 import petsupplies from "../assets/images/petsupplies.jpg";
 
+/* LOGOS */
 const logos = [
   { title: "Beauty Brand", img: beauty },
   { title: "Fashion Store", img: fashion },
   { title: "Bakery", img: Bakery },
-  { title: "Jewllery", img: Jewellery },
+  { title: "Jewellery", img: Jewellery },
   { title: "Tech Startup", img: tech },
   { title: "Food Brand", img: food },
   { title: "Skincare", img: skincare },
-  { title: "petsupplies", img: petsupplies },
-  
- 
-  
+  { title: "Pet Supplies", img: petsupplies },
+];
+
+/* FAQ */
+const faqs = [
+  {
+    q: "How does the AI generate designs for logos and other stuff?",
+    a: "Our AI uses advanced algorithms and trained datasets to generate unique logos and branding assets based on your input.",
+  },
+  {
+    q: "What file formats are available for downloading the designs?",
+    a: "You can download PNG, PDF, and SVG formats depending on your plan.",
+  },
+  {
+    q: "Is there a limit to how many designs I can generate?",
+    a: "Free users have limited generations. Premium users get unlimited access.",
+  },
+  {
+    q: "Does the AI generate unique designs, or are they templates?",
+    a: "All designs are generated uniquely based on your prompt.",
+  },
+  {
+    q: "How secure is my data on your platform?",
+    a: "We follow industry best practices for encryption and data security.",
+  },
+  {
+    q: "Can I use the designs for commercial purposes?",
+    a: "Yes. All premium designs include commercial usage rights.",
+  },
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
+  const [openIndex, setOpenIndex] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  /* Scroll-to-top visibility */
+  useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <>
-      {/* HERO SECTION */}
-      <section
-        style={{
-          padding: "120px 24px",
-          textAlign: "center",
-          background: "linear-gradient(180deg, #ffffff 0%, #fff5fa 100%)",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "52px",
-            fontWeight: "800",
-            maxWidth: "860px",
-            margin: "0 auto",
-            lineHeight: "1.15",
-          }}
-        >
+      {/* ================= HERO ================= */}
+      <section className="hero">
+        <h1>
           Create a logo that helps you{" "}
-          <span style={{ color: "#ff4da6" }}>sell more</span> on Instagram
+          <span className="pink">sell more</span> on Instagram
         </h1>
 
-        <p
-          style={{
-            marginTop: "20px",
-            fontSize: "17px",
-            color: "#555",
-            maxWidth: "640px",
-            marginLeft: "auto",
-            marginRight: "auto",
-          }}
-        >
-          Professional AI-powered logos designed for creators, Instagram sellers,
-          and modern startups.
+        <p>
+          Professional AI-powered logos designed for creators and modern brands.
         </p>
 
-        <div style={{ marginTop: "36px" }}>
-          <input
-            placeholder="A minimal pink logo for a beauty brand on Instagram"
-            style={{
-              width: "100%",
-              maxWidth: "560px",
-              padding: "16px 20px",
-              borderRadius: "14px",
-              border: "1px solid #ddd",
-              fontSize: "15px",
-              outline: "none",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-            }}
-          />
-        </div>
+        <input placeholder="A minimal pink logo for a beauty brand" />
 
         <button
-          style={{
-            marginTop: "28px",
-            background: "#ff4da6",
-            color: "#fff",
-            padding: "16px 36px",
-            borderRadius: "32px",
-            border: "none",
-            fontSize: "16px",
-            fontWeight: "600",
-            cursor: "pointer",
-            boxShadow: "0 14px 40px rgba(255,77,166,0.4)",
-          }}
+          className="primary-cta"
+          onClick={() => navigate("/signup")}
         >
           Generate my logo
         </button>
-
-        <p style={{ marginTop: "12px", fontSize: "12px", color: "#999" }}>
-          No credit card required · Create in seconds
-        </p>
       </section>
 
-      {/* EXPLORE SECTION (ALWAYS VISIBLE BELOW HERO) */}
+      {/* ================= EXPLORE ================= */}
       <section className="explore-page">
         <h1>Explore AI-Generated Logos</h1>
 
@@ -112,6 +103,62 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* ================= FAQ ================= */}
+      <section className="faq-section">
+        <h2>Frequently Asked Questions</h2>
+
+        {faqs.map((item, index) => (
+          <div className="faq-item" key={index}>
+            <div
+              className="faq-question"
+              onClick={() =>
+                setOpenIndex(openIndex === index ? null : index)
+              }
+            >
+              <span>{item.q}</span>
+              <span>{openIndex === index ? "⌃" : "⌄"}</span>
+            </div>
+
+            {openIndex === index && (
+              <p className="faq-answer">{item.a}</p>
+            )}
+          </div>
+        ))}
+      </section>
+
+      {/* ================= FREE AI DESIGNERS ================= */}
+      <section className="free-ai">
+        <div className="stars">★★★★★</div>
+        <p className="trusted">Trusted by users</p>
+
+        <h2>Free Online AI Designers</h2>
+
+        <p className="desc">
+          Watch your ideas transform into stunning designs that help your
+          projects stand out.
+        </p>
+
+        <button
+          className="black-cta"
+          onClick={() => navigate("/signup")}
+        >
+          CREATE NOW
+        </button>
+
+        <div className="footer-links">
+          <Link to="/privacy-policy">Privacy Policy</Link>
+          <Link to="/terms-of-use">Terms of Use</Link>
+          <Link to="/about">About Us</Link>
+        </div>
+      </section>
+
+      {/* ================= SCROLL TO TOP ================= */}
+      {showScrollTop && (
+        <button className="scroll-top-btn" onClick={scrollToTop}>
+          ↑
+        </button>
+      )}
     </>
   );
 }
