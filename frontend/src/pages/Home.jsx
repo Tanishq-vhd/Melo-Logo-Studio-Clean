@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Explore.css";
 
@@ -10,6 +10,15 @@ import tech from "../assets/images/tech.jpg";
 import food from "../assets/images/Food.jpg";
 import skincare from "../assets/images/skincare.jpg";
 import petsupplies from "../assets/images/petsupplies.jpg";
+
+/* AUTO PROMPTS */
+const prompts = [
+  "A minimal pink logo for a beauty brand",
+  "Luxury gold jewellery branding",
+  "Modern tech startup logo",
+  "Instagram fitness flyer design",
+  "Elegant bakery pastel logo",
+];
 
 /* LOGOS */
 const logos = [
@@ -23,40 +32,25 @@ const logos = [
   { title: "Pet Supplies", img: petsupplies },
 ];
 
-/* FAQ */
-const faqs = [
-  {
-    q: "How does the AI generate designs for logos and other stuff?",
-    a: "Our AI uses advanced algorithms and trained datasets to generate unique logos and branding assets based on your input.",
-  },
-  {
-    q: "What file formats are available for downloading the designs?",
-    a: "You can download PNG, PDF, and SVG formats depending on your plan.",
-  },
-  {
-    q: "Is there a limit to how many designs I can generate?",
-    a: "Free users have limited generations. Premium users get unlimited access.",
-  },
-  {
-    q: "Does the AI generate unique designs, or are they templates?",
-    a: "All designs are generated uniquely based on your prompt.",
-  },
-  {
-    q: "How secure is my data on your platform?",
-    a: "We follow industry best practices for encryption and data security.",
-  },
-  {
-    q: "Can I use the designs for commercial purposes?",
-    a: "Yes. All premium designs include commercial usage rights.",
-  },
-];
-
 export default function Home() {
   const navigate = useNavigate();
-  const [openIndex, setOpenIndex] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  /* Scroll-to-top visibility */
+  /* Rotating placeholder */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) =>
+        prev === prompts.length - 1 ? 0 : prev + 1
+      );
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  /* Scroll button visibility */
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener("scroll", onScroll);
@@ -67,9 +61,20 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  /* Plus click logic */
+  const handlePlusClick = () => {
+    const isPaid = localStorage.getItem("isPaid");
+
+    if (isPaid === "true") {
+      fileInputRef.current.click();
+    } else {
+      navigate("/signup");
+    }
+  };
+
   return (
     <>
-      {/* ================= HERO ================= */}
+      {/* HERO SECTION */}
       <section className="hero">
         <h1>
           Create a logo that helps you{" "}
@@ -80,7 +85,24 @@ export default function Home() {
           Professional AI-powered logos designed for creators and modern brands.
         </p>
 
-        <input placeholder="A minimal pink logo for a beauty brand" />
+        {/* SEARCH BAR */}
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder={prompts[placeholderIndex]}
+            className="hero-input"
+          />
+
+          <button className="plus-btn" onClick={handlePlusClick}>
+            +
+          </button>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+          />
+        </div>
 
         <button
           className="primary-cta"
@@ -90,7 +112,7 @@ export default function Home() {
         </button>
       </section>
 
-      {/* ================= EXPLORE ================= */}
+      {/* EXPLORE SECTION */}
       <section className="explore-page">
         <h1>Explore AI-Generated Logos</h1>
 
@@ -104,33 +126,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ================= FAQ ================= */}
-      <section className="faq-section">
-        <h2>Frequently Asked Questions</h2>
-
-        {faqs.map((item, index) => (
-          <div className="faq-item" key={index}>
-            <div
-              className="faq-question"
-              onClick={() =>
-                setOpenIndex(openIndex === index ? null : index)
-              }
-            >
-              <span>{item.q}</span>
-              <span>{openIndex === index ? "⌃" : "⌄"}</span>
-            </div>
-
-            {openIndex === index && (
-              <p className="faq-answer">{item.a}</p>
-            )}
-          </div>
-        ))}
-      </section>
-
-      {/* ================= FREE AI DESIGNERS ================= */}
+      {/* FOOTER CTA */}
       <section className="free-ai">
         <div className="stars">★★★★★</div>
-        <p className="trusted">Trusted by users</p>
+        <p className="trusted">Trusted by over 20M+ users</p>
 
         <h2>Free Online AI Designers</h2>
 
@@ -153,7 +152,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ================= SCROLL TO TOP ================= */}
+      {/* SCROLL TO TOP */}
       {showScrollTop && (
         <button className="scroll-top-btn" onClick={scrollToTop}>
           ↑
