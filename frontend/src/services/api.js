@@ -1,6 +1,12 @@
-const API_URL = "http://localhost:5000/api";
+const API_BASE = process.env.REACT_APP_API_URL;
 
-// ✅ SAFE response handler (NO throwing)
+if (!API_BASE) {
+  console.error("API URL is not defined in environment variables.");
+}
+
+const API_URL = `${API_BASE}/api`;
+
+// ✅ SAFE response handler
 const safeJson = async (res) => {
   try {
     return await res.json();
