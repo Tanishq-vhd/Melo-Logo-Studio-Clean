@@ -1,29 +1,33 @@
 import express from "express";
-import { getRazorpay } from "../config/razorpay.js";
-import authMiddleware from "../middleware/authMiddleware.js";
+import Razorpay from "razorpay";
 
 const router = express.Router();
 
-router.post("/create-order", authMiddleware, async (req, res) => {
+router.post("/create-order", async (req, res) => {
   try {
-    const { amount } = req.body;
-
-    if (!amount) {
-      return res.status(400).json({ message: "Amount required" });
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(500).json({
+        message: "Razorpay keys missing in .env file",
+      });
     }
 
-    const razorpay = getRazorpay();
-
-    const order = await razorpay.orders.create({
-      amount: amount * 100,
-      currency: "INR",
-      receipt: `receipt_${Date.now()}`,
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
+    const options = {
+      amount: 29900,
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+
     res.json(order);
-  } catch (err) {
-    console.error("Razorpay order error:", err.message);
-    res.status(500).json({ message: "Order creation failed" });
+  } catch (error) {
+    console.error("Create order error:", error.message);
+    res.status(500).json({ message: "Failed to create order" });
   }
 });
 

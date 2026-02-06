@@ -5,20 +5,36 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-/* =========================
-   SIGNUP (EMAIL + PASSWORD)
-========================= */
+/* =====================================
+   GENERATE JWT TOKEN
+===================================== */
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id }, // keep consistent everywhere
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+};
+
+/* =====================================
+   SIGNUP
+===================================== */
 router.post("/signup", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
 
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
-      return res.status(409).json({ message: "Email already registered" });
+      return res.status(409).json({
+        message: "Email already registered",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -27,13 +43,11 @@ router.post("/signup", async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      plan: "free",
+      isPaid: false,
     });
 
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = generateToken(user);
 
     res.status(201).json({
       message: "Signup successful",
@@ -43,17 +57,19 @@ router.post("/signup", async (req, res) => {
         name: user.name,
         email: user.email,
         isPaid: user.isPaid,
+        plan: user.plan,
       },
     });
+
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-/* =========================
-   LOGIN (EMAIL + PASSWORD)
-========================= */
+/* =====================================
+   LOGIN
+===================================== */
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -65,6 +81,7 @@ router.post("/login", async (req, res) => {
     }
 
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(401).json({
         message: "Invalid email or password",
@@ -72,17 +89,14 @@ router.post("/login", async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(401).json({
         message: "Invalid email or password",
       });
     }
 
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = generateToken(user);
 
     res.status(200).json({
       message: "Login successful",
@@ -92,17 +106,19 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         isPaid: user.isPaid,
+        plan: user.plan,
       },
     });
+
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-/* =========================
+/* =====================================
    GOOGLE LOGIN / SIGNUP
-========================= */
+===================================== */
 router.post("/google", async (req, res) => {
   try {
     const { email, name, googleId } = req.body;
@@ -115,20 +131,20 @@ router.post("/google", async (req, res) => {
 
     let user = await User.findOne({ email });
 
-    // 🔹 First time Google user → create account
+    // If first time Google login → create user
     if (!user) {
+      const hashedPassword = await bcrypt.hash(googleId, 10);
+
       user = await User.create({
         name: name || "Google User",
         email,
-        password: googleId, // dummy (never used)
+        password: hashedPassword,
+        plan: "free",
+        isPaid: false,
       });
     }
 
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = generateToken(user);
 
     res.status(200).json({
       message: "Google login successful",
@@ -138,8 +154,10 @@ router.post("/google", async (req, res) => {
         name: user.name,
         email: user.email,
         isPaid: user.isPaid,
+        plan: user.plan,
       },
     });
+
   } catch (err) {
     console.error("Google auth error:", err);
     res.status(500).json({ message: "Server error" });

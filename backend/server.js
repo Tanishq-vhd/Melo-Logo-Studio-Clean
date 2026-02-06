@@ -1,17 +1,6 @@
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
+dotenv.config(); // Load .env first
 
-// 🔥 FORCE dotenv FIRST
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-dotenv.config({ path: path.join(__dirname, ".env") });
-console.log("ENV CHECK:", {
-  MONGO_URI: process.env.MONGO_URI,
-});
-
-// ⬇️ NOW import everything else
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -20,17 +9,19 @@ import authRoutes from "./routes/auth.js";
 import protectedRoutes from "./routes/protected.js";
 import paymentRoutes from "./routes/payment.js";
 
-
-
-
-
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+/* 🔍 Debug ENV (optional) */
+console.log("ENV CHECK:", {
+  MONGO_URI: process.env.MONGO_URI ? "Loaded ✅" : "Missing ❌",
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID ? "Loaded ✅" : "Missing ❌",
+});
 
 /* 🌐 Middleware */
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend
+    origin: ["http://localhost:3000", "http://localhost:3001"],
     credentials: true,
   })
 );
@@ -52,8 +43,6 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
-    console.log("MongoDB ready for queries");
-
     app.listen(PORT, () => {
       console.log(`Backend running on http://localhost:${PORT}`);
     });
