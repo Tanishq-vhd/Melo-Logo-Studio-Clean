@@ -7,8 +7,8 @@ import Melostudio from "./pages/Melostudio";
 import Maxx from "./pages/Maxx";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
-import Payment from "./pages/payment";
-import Success from "./pages/success";
+import Payment from "./pages/Payment";
+import Success from "./pages/Success";
 import Privacy from "./pages/Privacy";
 import TermsOfUse from "./pages/TermsOfUse";
 import AboutUs from "./pages/AboutUs";
@@ -16,13 +16,23 @@ import AboutUs from "./pages/AboutUs";
 /* 🔐 Login required */
 const RequireAuth = ({ children }) => {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/signin" replace />;
+
+  if (!token) {
+    return <Navigate to="/signin" replace />;
+  }
+
+  return children;
 };
 
-/* 💳 Payment required */
+/* 💳 Premium required */
 const RequirePayment = ({ children }) => {
-  const isPaid = localStorage.getItem("isPaid");
-  return isPaid === "true" ? children : <Navigate to="/payment" replace />;
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (!user || !user.isPaid) {
+    return <Navigate to="/payment" replace />;
+  }
+
+  return children;
 };
 
 function App() {
@@ -41,7 +51,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
 
-        {/* 💳 Payment */}
+        {/* 💳 Payment (login required) */}
         <Route
           path="/payment"
           element={
@@ -51,7 +61,7 @@ function App() {
           }
         />
 
-        {/* 🔒 Protected */}
+        {/* 🔒 Premium Protected Pages */}
         <Route
           path="/maxx"
           element={
@@ -85,7 +95,7 @@ function App() {
           }
         />
 
-        {/* 🔁 ALWAYS LAST */}
+        {/* 🔁 Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

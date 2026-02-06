@@ -5,8 +5,16 @@ export default function Payment() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const API_URL = process.env.REACT_APP_API_URL;
+  const RAZORPAY_KEY = process.env.REACT_APP_RAZORPAY_KEY;
+
   const handlePayment = async () => {
     if (loading) return;
+
+    if (!API_URL || !RAZORPAY_KEY) {
+      alert("Payment configuration error.");
+      return;
+    }
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -15,51 +23,53 @@ export default function Payment() {
     }
 
     if (!window.Razorpay) {
-      console.error("Razorpay SDK not loaded");
-      alert("Payment service not ready. Refresh the page.");
+      alert("Payment system not loaded. Refresh the page.");
       return;
     }
 
     try {
       setLoading(true);
 
-      // ✅ SEND AMOUNT PROPERLY
+      // 🔹 Create Order from backend
       const orderRes = await fetch(
-        "http://localhost:5000/api/payment/create-order",
+        `${API_URL}/api/payment/create-order`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            amount: 299, // 👈 REQUIRED BY BACKEND
-          }),
+          body: JSON.stringify({}),
         }
       );
 
       if (!orderRes.ok) {
-        const err = await orderRes.json();
-        console.error("Order creation error:", err);
         setLoading(false);
+        alert("Unable to initiate payment.");
         return;
       }
 
       const order = await orderRes.json();
-      console.log("Order created:", order);
 
+      if (!order?.id) {
+        setLoading(false);
+        alert("Invalid payment order.");
+        return;
+      }
+
+      // 🔹 Razorpay Checkout
       const options = {
-        key: "rzp_test_SBBBNklr7fNhoX",
+        key: RAZORPAY_KEY,
         amount: order.amount,
-        currency: "INR",
-        name: "Insta Logo Studio",
+        currency: order.currency,
+        name: "Melo Studio",
         description: "Premium Access",
         order_id: order.id,
 
-        handler: async (response) => {
+        handler: async function (response) {
           try {
             const verifyRes = await fetch(
-              "http://localhost:5000/api/payment/verify",
+              `${API_URL}/api/payment/verify-payment`,
               {
                 method: "POST",
                 headers: {
@@ -67,25 +77,32 @@ export default function Payment() {
                   Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
                   razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
                 }),
               }
             );
 
             if (!verifyRes.ok) {
-              console.error("Payment verification failed");
+              setLoading(false);
+              alert("Payment verification failed.");
               return;
             }
 
             localStorage.setItem("isPaid", "true");
             navigate("/ai-tools");
+
           } catch (err) {
-            console.error("Verification error:", err);
+            setLoading(false);
+            alert("Verification failed.");
           }
         },
 
         modal: {
-          ondismiss: () => setLoading(false),
+          ondismiss: function () {
+            setLoading(false);
+          },
         },
 
         theme: {
@@ -95,140 +112,99 @@ export default function Payment() {
 
       const rzp = new window.Razorpay(options);
       rzp.open();
-    } catch (err) {
-      console.error("Payment error:", err);
+
+    } catch (error) {
       setLoading(false);
+      alert("Payment failed. Please try again.");
     }
   };
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
-        <p style={styles.topBadge}>✨ Your logo is ready to download</p>
-
-        <h1 style={styles.heading}>
-          Unlock your professional <br /> brand kit
-        </h1>
-
+        <h1 style={styles.heading}>Unlock Premium Access</h1>
         <p style={styles.subText}>
-          Get unlimited variations, full commercial rights, and files optimized
-          for every platform.
+          Get unlimited logos, full commercial rights, and all formats.
         </p>
 
-        <div style={styles.features}>
-          <Feature
-            title="Unlimited logo variations"
-            desc="Generate as many concepts as you need"
-          />
-          <Feature
-            title="Full commercial license"
-            desc="No watermarks, use anywhere you want"
-          />
-          <Feature
-            title="All file formats included"
-            desc="PNG, SVG, PDF — ready for any platform"
-          />
-        </div>
-
         <div style={styles.priceCard}>
-          <div style={styles.priceHeader}>
-            <span style={styles.plan}>Premium Access</span>
-            <span style={styles.badge}>Limited time</span>
-          </div>
-
-          <div style={styles.price}>
-            ₹299 <span style={styles.per}>/ month</span>
-          </div>
-
-          <p style={styles.cancel}>Cancel anytime</p>
+          <div style={styles.price}>₹299</div>
+          <p style={styles.cancel}>One-time payment</p>
         </div>
 
         <button
           style={{
             ...styles.cta,
-            opacity: loading ? 0.85 : 1,
+            opacity: loading ? 0.8 : 1,
             cursor: loading ? "not-allowed" : "pointer",
           }}
           onClick={handlePayment}
           disabled={loading}
         >
-          {loading ? "Opening payment…" : "Create my first logo"}
+          {loading ? "Opening payment..." : "Pay ₹299"}
         </button>
 
         <p style={styles.footerText}>
-          🔒 Secure payment • Cancel anytime
+          Secure payment • Cancel anytime
         </p>
       </div>
     </div>
   );
 }
 
-const Feature = ({ title, desc }) => (
-  <div style={styles.featureItem}>
-    <span style={styles.check}>✓</span>
-    <div>
-      <p style={styles.featureTitle}>{title}</p>
-      <p style={styles.featureDesc}>{desc}</p>
-    </div>
-  </div>
-);
-
-/* 🎨 Styles unchanged */
 const styles = {
   page: {
     minHeight: "100vh",
-    background:
-      "linear-gradient(180deg, #fff 0%, #fff5fa 60%, #ffffff 100%)",
+    background: "#fff",
     display: "flex",
     justifyContent: "center",
-    padding: "36px 16px",
+    alignItems: "center",
   },
   container: {
     width: "100%",
-    maxWidth: "420px",
-    background: "rgba(255,255,255,0.95)",
-    borderRadius: "18px",
-    padding: "30px 24px",
+    maxWidth: "400px",
+    background: "#ffffff",
+    borderRadius: "16px",
+    padding: "30px",
     textAlign: "center",
-    boxShadow:
-      "0 25px 50px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
+    boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
   },
-  topBadge: { color: "#ff3d8b", fontWeight: "600", marginBottom: "14px" },
-  heading: { fontSize: "26px", fontWeight: "700" },
-  subText: { fontSize: "14px", color: "#666", marginBottom: "22px" },
-  features: { textAlign: "left", marginBottom: "22px" },
-  featureItem: { display: "flex", gap: "10px", marginBottom: "10px" },
-  check: { color: "#ff3d8b", fontWeight: "700" },
-  featureTitle: { fontWeight: "600", fontSize: "14px" },
-  featureDesc: { fontSize: "13px", color: "#777" },
-  priceCard: {
-    borderRadius: "14px",
-    padding: "16px",
-    width: "90%",
-    background: "#fff7fb",
-    border: "1.5px solid #ffd3e6",
-  },
-  priceHeader: { display: "flex", justifyContent: "space-between" },
-  plan: { fontWeight: "600" },
-  badge: {
-    background: "#ffe8f1",
-    color: "#ff3d8b",
-    padding: "4px 10px",
-    borderRadius: "999px",
-    fontSize: "11px",
-  },
-  price: { fontSize: "22px" },
-  per: { fontSize: "14px", color: "#777" },
-  cancel: { fontSize: "12px", color: "#888" },
-  cta: {
-    width: "100%",
-    padding: "15px",
-    background:
-      "linear-gradient(135deg, #ff2f7d 0%, #ff5fa2 100%)",
-    color: "#fff",
-    borderRadius: "14px",
-    fontSize: "16px",
+  heading: {
+    fontSize: "22px",
     fontWeight: "700",
   },
-  footerText: { marginTop: "14px", fontSize: "12px", color: "#777" },
+  subText: {
+    fontSize: "14px",
+    color: "#666",
+    marginBottom: "20px",
+  },
+  priceCard: {
+    background: "#fff5fa",
+    padding: "20px",
+    borderRadius: "12px",
+    marginBottom: "20px",
+  },
+  price: {
+    fontSize: "24px",
+    fontWeight: "700",
+  },
+  cancel: {
+    fontSize: "12px",
+    color: "#777",
+  },
+  cta: {
+    width: "100%",
+    padding: "14px",
+    background: "#ff2f7d",
+    color: "#fff",
+    border: "none",
+    borderRadius: "12px",
+    fontSize: "16px",
+    fontWeight: "600",
+  },
+  footerText: {
+    marginTop: "14px",
+    fontSize: "12px",
+    color: "#777",
+  },
 };
