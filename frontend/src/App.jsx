@@ -2,16 +2,16 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 
 // Pages
-import Home from "./Pages/Home";
-import Melostudio from "./Pages/Melostudio";
-import Maxx from "./Pages/Maxx";
-import SignIn from "./Pages/SignIn";
-import SignUp from "./Pages/SignUp";
-import Payment from "./Pages/Payment";
-import Success from "./Pages/Success";
-import Privacy from "./Pages/Privacy";
-import TermsOfUse from "./Pages/TermsOfUse";
-import AboutUs from "./Pages/AboutUs";
+import Home from "./pages/Home";
+import Melostudio from "./pages/Melostudio";
+import Maxx from "./pages/Maxx";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import Payment from "./pages/Payment";
+import Success from "./pages/Success";
+import Privacy from "./pages/Privacy";
+import TermsOfUse from "./pages/TermsOfUse";
+import AboutUs from "./pages/AboutUs";
 
 /* 🔐 Login required */
 const RequireAuth = ({ children }) => {
