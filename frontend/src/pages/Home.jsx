@@ -141,7 +141,7 @@ export default function Home() {
 
       <section className="free-ai">
         <div className="stars">★★★★★</div>
-        <p className="trusted">Trusted by over  users</p>
+        <p className="trusted">Trusted by users</p>
         <h2>Free Online AI Designers</h2>
         <p className="desc">Watch your ideas transform into stunning designs.</p>
         <button className="black-cta" onClick={() => navigate("/signup")}>CREATE NOW</button>
