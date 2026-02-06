@@ -12,47 +12,49 @@ export default function AboutUs() {
       {/* HEADER */}
       <h1>About us</h1>
       <h2 className="sub-heading">
-        Idealabs – Weaving Tech with Heart
+        Melo – Where Ideas Turn Into Impact
       </h2>
 
       <p>
-        Born from a vibrant innovation hub, IdeaLabs emerged as a catalyst for
-        tech-driven transformation. We extend our expertise beyond the app and
-        product development to encompass the realms of strategic marketing and
-        brand elevation, ensuring your vision takes center stage in the digital
-        realm.
+        Built with passion and purpose, Melo is more than a tech startup. 
+        We create digital experiences that feel human. 
+        From web platforms to scalable products, we blend clean design,
+        strong engineering, and real business thinking to build solutions 
+        that actually matter.
       </p>
 
       {/* FEATURES */}
       <div className="feature-grid">
         <div className="feature-card">
-          <h3>Boundless Imagination</h3>
+          <h3>Driven by Creativity</h3>
           <p>
-            Our audacious ambitions carve an uncharted path to an infinite
-            realm of possibilities.
+            We believe great products start with bold ideas. Creativity fuels everything we build, 
+            from concept to deployment.
           </p>
         </div>
 
         <div className="feature-card">
-          <h3>Embrace the Enigma</h3>
+          <h3>Built with Precision</h3>
           <p>
-            In the pursuit of innovation, we cherish experimentation and the
-            wealth of insights born from trial.
+            Clean code. Smart architecture. Scalable systems. 
+            We focus on building technology that performs today and
+            grows tomorrow.
           </p>
         </div>
 
         <div className="feature-card">
-          <h3>Curiosity Ignites Exploration</h3>
+          <h3>Curious by Nature</h3>
           <p>
-            Challenging conventions and venturing into the unknown, we redefine
-            solutions that captivate minds and markets alike.
+            We explore, experiment, and improve continuously. 
+            Every challenge is an opportunity to learn and build better.
           </p>
         </div>
 
         <div className="feature-card">
-          <h3>Empower Your Ascension</h3>
+          <h3>Growing Together</h3>
           <p>
-            Our trajectory propels upward, inviting you to evolve in tandem.
+            Your success is our success. We collaborate closely, adapt 
+            quickly, and move forward as one team.
           </p>
         </div>
       </div>

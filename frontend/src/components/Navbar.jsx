@@ -21,7 +21,7 @@ export default function Navbar() {
         <Link to="/" className="logo">
           <img
             src={logo}
-            alt="Melo"
+            alt="melo"
             className="brand-logo"
           />
           <span className="brand-name">melo</span>
@@ -29,7 +29,7 @@ export default function Navbar() {
 
         <nav className="nav-links">
           <NavLink to="/" end>Home</NavLink>
-          <NavLink to="/Melostudio">Melostudio</NavLink>
+          <NavLink to="/melostudio">melostudio</NavLink>
           <NavLink to="/Maxx">Maxx</NavLink>
         </nav>
 
