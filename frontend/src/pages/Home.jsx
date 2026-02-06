@@ -11,7 +11,6 @@ import food from "../assets/images/Food.jpg";
 import skincare from "../assets/images/skincare.jpg";
 import petsupplies from "../assets/images/petsupplies.jpg";
 
-/* AUTO PROMPTS */
 const prompts = [
   "A minimal pink logo for a beauty brand",
   "Luxury gold jewellery branding",
@@ -20,7 +19,6 @@ const prompts = [
   "Elegant bakery pastel logo",
 ];
 
-/* LOGOS */
 const logos = [
   { title: "Beauty Brand", img: beauty },
   { title: "Fashion Store", img: fashion },
@@ -35,36 +33,48 @@ const logos = [
 export default function Home() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [inputValue, setInputValue] = useState("");
+  const [placeholder, setPlaceholder] = useState("");
+  const [promptIndex, setPromptIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  /* Rotating placeholder */
+  // Typing Animation Logic (Left to Right)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPlaceholderIndex((prev) =>
-        prev === prompts.length - 1 ? 0 : prev + 1
-      );
-    }, 2500);
+    const currentFullText = prompts[promptIndex];
+    const typingSpeed = isDeleting ? 50 : 100;
 
-    return () => clearInterval(interval);
-  }, []);
+    const timeout = setTimeout(() => {
+      if (!isDeleting && charIndex < currentFullText.length) {
+        // Typing forward
+        setPlaceholder(currentFullText.substring(0, charIndex + 1));
+        setCharIndex((prev) => prev + 1);
+      } else if (isDeleting && charIndex > 0) {
+        // Deleting backward
+        setPlaceholder(currentFullText.substring(0, charIndex - 1));
+        setCharIndex((prev) => prev - 1);
+      } else if (!isDeleting && charIndex === currentFullText.length) {
+        // Pause at the end before deleting
+        setTimeout(() => setIsDeleting(true), 2000);
+      } else if (isDeleting && charIndex === 0) {
+        // Move to next prompt
+        setIsDeleting(false);
+        setPromptIndex((prev) => (prev + 1) % prompts.length);
+      }
+    }, typingSpeed);
 
-  /* Scroll button visibility */
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, promptIndex]);
+
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  /* Plus click logic */
   const handlePlusClick = () => {
     const isPaid = localStorage.getItem("isPaid");
-
     if (isPaid === "true") {
       fileInputRef.current.click();
     } else {
@@ -72,50 +82,53 @@ export default function Home() {
     }
   };
 
+  const handleGenerate = () => {
+    if (inputValue.trim() || placeholder) {
+      navigate("/signup"); 
+    }
+  };
+
   return (
     <>
-      {/* HERO SECTION */}
       <section className="hero">
         <h1>
-          Create a logo that helps you{" "}
-          <span className="pink">sell more</span> on Instagram
+          Create a logo that helps you <span className="pink">sell more</span> on Instagram
         </h1>
+        <p>Professional AI-powered logos designed for creators and modern brands.</p>
 
-        <p>
-          Professional AI-powered logos designed for creators and modern brands.
-        </p>
-
-        {/* SEARCH BAR */}
         <div className="search-container">
-          <input
-            type="text"
-            placeholder={prompts[placeholderIndex]}
-            className="hero-input"
-          />
-
-          <button className="plus-btn" onClick={handlePlusClick}>
-            +
-          </button>
-
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-          />
+          <div className="prompt-container-main">
+            <div className="input-wrapper">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={placeholder}
+                className="clean-input"
+              />
+            </div>
+            
+            <div className="icon-row">
+              <button type="button" className="minimal-plus-btn" onClick={handlePlusClick}>
+                +
+              </button>
+              <button 
+                type="button" 
+                className="minimal-arrow-btn" 
+                onClick={handleGenerate}
+                aria-label="Submit"
+              >
+                ↑
+              </button>
+            </div>
+            
+            <input type="file" ref={fileInputRef} hidden />
+          </div>
         </div>
-
-        <button
-          className="primary-cta"
-          onClick={() => navigate("/signup")}
-        >
-          Generate my logo
-        </button>
       </section>
 
-      {/* EXPLORE SECTION */}
       <section className="explore-page">
         <h1>Explore AI-Generated Logos</h1>
-
         <div className="logo-grid">
           {logos.map((item, index) => (
             <div className="logo-card" key={index}>
@@ -126,25 +139,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER CTA */}
       <section className="free-ai">
         <div className="stars">★★★★★</div>
         <p className="trusted">Trusted by over 20M+ users</p>
-
         <h2>Free Online AI Designers</h2>
-
-        <p className="desc">
-          Watch your ideas transform into stunning designs that help your
-          projects stand out.
-        </p>
-
-        <button
-          className="black-cta"
-          onClick={() => navigate("/signup")}
-        >
-          CREATE NOW
-        </button>
-
+        <p className="desc">Watch your ideas transform into stunning designs.</p>
+        <button className="black-cta" onClick={() => navigate("/signup")}>CREATE NOW</button>
         <div className="footer-links">
           <Link to="/privacy-policy">Privacy Policy</Link>
           <Link to="/terms-of-use">Terms of Use</Link>
@@ -152,9 +152,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SCROLL TO TOP */}
       {showScrollTop && (
-        <button className="scroll-top-btn" onClick={scrollToTop}>
+        <button className="scroll-top-btn" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
           ↑
         </button>
       )}
