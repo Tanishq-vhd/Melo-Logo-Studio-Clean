@@ -1,30 +1,79 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signupUser } from "../services/api";
+import { auth } from "../firebase";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import logo from "../assets/images/logo.jpg";
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
+  // ================= EMAIL SIGNUP =================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const res = await signupUser(form);
-    if (res?.token) {
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("isPaid", "false");
-      navigate("/payment");
-    } else {
-      setError(res?.message || "Signup failed");
+    try {
+      const res = await signupUser(form);
+
+      if (res?.token) {
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("isPaid", "false");
+        navigate("/payment");
+      } else {
+        setError(res?.message || "Signup failed");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
     }
+
+    setLoading(false);
+  };
+
+  // ================= GOOGLE SIGNUP =================
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      const user = result.user;
+
+      // Send user to backend to create account / login
+      const res = await signupUser({
+        name: user.displayName,
+        email: user.email,
+        password: user.uid, // simple approach
+      });
+
+      if (res?.token) {
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("isPaid", "false");
+        navigate("/payment");
+      } else {
+        setError(res?.message || "Google signup failed");
+      }
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      setError("Google sign-in failed");
+    }
+
     setLoading(false);
   };
 
@@ -35,11 +84,12 @@ export default function SignUp() {
 
         <h1>Create account</h1>
 
-        {/* GOOGLE SIGN UP */}
+        {/* GOOGLE BUTTON */}
         <button
           type="button"
           className="google-btn"
-          onClick={() => alert("Google Sign-Up coming soon")}
+          onClick={handleGoogleSignIn}
+          disabled={loading}
         >
           <img
             src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -52,11 +102,13 @@ export default function SignUp() {
           <span>or</span>
         </div>
 
+        {/* EMAIL SIGNUP */}
         <form className="auth-form" onSubmit={handleSubmit}>
           <input
             type="text"
             name="name"
             placeholder="Name"
+            value={form.name}
             onChange={handleChange}
             required
           />
@@ -65,6 +117,7 @@ export default function SignUp() {
             type="email"
             name="email"
             placeholder="Email"
+            value={form.email}
             onChange={handleChange}
             required
           />
@@ -73,6 +126,7 @@ export default function SignUp() {
             type="password"
             name="password"
             placeholder="Password"
+            value={form.password}
             onChange={handleChange}
             required
           />

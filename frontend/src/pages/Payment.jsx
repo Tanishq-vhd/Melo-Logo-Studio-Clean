@@ -119,88 +119,177 @@ export default function Payment() {
     }
   };
 
-  return (
-    <div style={styles.page}>
-      <div style={styles.container}>
-        <h1 style={styles.heading}>Unlock Premium Access</h1>
-        <p style={styles.subText}>
-          Get unlimited logos, full commercial rights, and all formats.
-        </p>
+ return (
+  <div style={styles.page}>
+    <div style={styles.container}>
+      <p style={styles.topText}>✨ Your logo is ready to download</p>
 
-        <div style={styles.priceCard}>
-          <div style={styles.price}>₹299</div>
-          <p style={styles.cancel}>One-time payment</p>
+      <h1 style={styles.heading}>
+        Unlock your professional <br /> brand kit
+      </h1>
+
+      <p style={styles.subText}>
+        Get unlimited variations, full commercial rights, and files optimized
+        for every platform.
+      </p>
+
+      <div style={styles.features}>
+        <Feature
+          title="Unlimited logo variations"
+          desc="Generate as many concepts as you need"
+        />
+        <Feature
+          title="Full commercial license"
+          desc="No watermarks, use anywhere you want"
+        />
+        <Feature
+          title="All file formats included"
+          desc="PNG, SVG, PDF — ready for any platform"
+        />
+      </div>
+
+      <div style={styles.priceCard}>
+        <div style={styles.priceHeader}>
+          <span style={styles.plan}>Premium Access</span>
+          <span style={styles.badge}>Limited time</span>
         </div>
 
-        <button
-          style={{
-            ...styles.cta,
-            opacity: loading ? 0.8 : 1,
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
-          onClick={handlePayment}
-          disabled={loading}
-        >
-          {loading ? "Opening payment..." : "Pay ₹299"}
-        </button>
+        <div style={styles.price}>
+          ₹299 <span style={styles.per}>/ month</span>
+        </div>
 
-        <p style={styles.footerText}>
-          Secure payment • Cancel anytime
-        </p>
+        <p style={styles.cancel}>Cancel anytime</p>
       </div>
+
+      <button
+        style={{
+          ...styles.cta,
+          opacity: loading ? 0.90:1,
+          cursor: loading ? "not-allowed" : "pointer",
+        }}
+        onClick={handlePayment}
+        disabled={loading}
+      >
+        {loading ? "Opening payment…" : "Create my first logo"}
+      </button>
+
+      <p style={styles.footerText}>
+        🔒 Secure payment • Cancel anytime
+      </p>
     </div>
-  );
+  </div>
+);
 }
+const Feature = ({ title, desc }) => (
+  <div style={styles.featureItem}>
+    <span style={styles.check}>✓</span>
+    <div>
+      <p style={styles.featureTitle}>{title}</p>
+      <p style={styles.featureDesc}>{desc}</p>
+    </div>
+  </div>
+);
+
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#fff",
+    minHeight: "110",
+    background:
+      "linear-gradient(180deg, #ffffff 0%, #fff5fa 60%, #ffffff 100%)",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    padding: "40px 16px",
   },
   container: {
     width: "100%",
-    maxWidth: "400px",
+    maxWidth: "430px",
     background: "#ffffff",
-    borderRadius: "16px",
-    padding: "30px",
+    borderRadius: "18px",
+    padding: "30px 24px",
     textAlign: "center",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
+    boxShadow:
+      "0 25px 50px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
+  },
+  topText: {
+    color: "#ff3d8b",
+    fontWeight: "600",
+    marginBottom: "12px",
   },
   heading: {
-    fontSize: "22px",
+    fontSize: "26px",
     fontWeight: "700",
+    marginBottom: "10px",
   },
   subText: {
     fontSize: "14px",
     color: "#666",
-    marginBottom: "20px",
+    marginBottom: "22px",
+  },
+  features: {
+    textAlign: "left",
+    marginBottom: "24px",
+  },
+  featureItem: {
+    display: "flex",
+    gap: "10px",
+    marginBottom: "14px",
+  },
+  check: {
+    color: "#ff3d8b",
+    fontWeight: "700",
+  },
+  featureTitle: {
+    fontWeight: "600",
+    fontSize: "14px",
+  },
+  featureDesc: {
+    fontSize: "13px",
+    color: "#777",
   },
   priceCard: {
-    background: "#fff5fa",
-    padding: "20px",
-    borderRadius: "12px",
-    marginBottom: "20px",
+    borderRadius: "14px",
+    padding: "18px",
+    background: "#fff7fb",
+    border: "1.5px solid #ffd3e6",
+    marginBottom: "24px",
+  },
+  priceHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "10px",
+  },
+  plan: {
+    fontWeight: "600",
+  },
+  badge: {
+    background: "#ffe8f1",
+    color: "#ff3d8b",
+    padding: "4px 10px",
+    borderRadius: "999px",
+    fontSize: "11px",
   },
   price: {
-    fontSize: "24px",
+    fontSize: "22px",
     fontWeight: "700",
+  },
+  per: {
+    fontSize: "14px",
+    color: "#777",
   },
   cancel: {
     fontSize: "12px",
-    color: "#777",
+    color: "#888",
   },
   cta: {
     width: "100%",
-    padding: "14px",
-    background: "#ff2f7d",
+    padding: "15px",
+    background:
+      "linear-gradient(135deg, #ff2f7d 0%, #ff5fa2 100%)",
     color: "#fff",
     border: "none",
-    borderRadius: "12px",
+    borderRadius: "14px",
     fontSize: "16px",
-    fontWeight: "600",
+    fontWeight: "700",
   },
   footerText: {
     marginTop: "14px",
