@@ -1,0 +1,30 @@
+[33ma41e77a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Fix Payment.jsx syntax error and update payment flow
+[33mb4ea3a2[m Fix CORS for production domain
+[33m31387e3[m Rename tempPages to pages lowercase
+[33m84426a3[m Rename Pages to tempPages
+[33mb6d4dad[m Fix: Hard reset folder casing to Pages for Vercel
+[33mf0ff02f[m Fix pages folder case properly
+[33m56af155[m Rename tempPages to pages (final lowercase)
+[33m4a53db6[m Rename Pages to tempPages
+[33m27f0d01[m Fix folder case and restore Pages properly
+[33mb17b20d[m Fix: Corrected folder casing for Vercel build
+[33m3b49817[m Fix all case-sensitive Pages imports
+[33m48eedc8[m Fix case-sensitive Pages imports
+[33m555f7df[m Fix case-sensitive pages folder
+[33m00661f9[m Fix case-sensitive Payment filename
+[33m22ea725[m Fix production API base URL
+[33me995d69[m Update production payment configuration
+[33m450c7f1[m Remove node_modules from tracking
+[33m15da382[m Backend updates and remove env from tracking
+[33mcb411fc[m Updated About section for Melo
+[33mb45f707[m final deploy version
+[33m0caa6d6[m final deploy version
+[33m9481969[m Today’s work summary
+[33m3fd100c[m Today’s work summary
+[33m2368534[m Frontend updates, new pages, backend changes, and cleanup
+[33m5c72a36[m Initial clean commit
+[33m7596bb7[m Add gitignore and remove env file
+[33mcbe49ee[m Initial clean commit
+[33m1e6dad0[m Remove secrets from history
+[33m8231f05[m Remove API keys and ignore env file
+[33m8ba9f90[m Fix nested git repo and add frontend

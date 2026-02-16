@@ -1,11 +1,12 @@
 import { useState } from "react";
 import "./Melostudio.css";
+import { FiDownload } from "react-icons/fi";
 
 export default function Melostudio() {
   const [style, setStyle] = useState("Minimal");
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState(null);
+  const [images, setImages] = useState([]);
   const [error, setError] = useState("");
 
   const generateLogo = async () => {
@@ -16,24 +17,54 @@ export default function Melostudio() {
 
     setError("");
     setLoading(true);
-    setImageUrl(null);
+    setImages([]);
 
     try {
-      const res = await fetch("http://localhost:5000/generate-logo", {
+      const finalPrompt = `${style} style logo. ${prompt}`;
+
+      const res = await fetch("http://localhost:5000/api/generate/image", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt,
-          style
-        })
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: finalPrompt }),
       });
 
+      if (!res.ok) {
+        throw new Error("Server error");
+      }
+
       const data = await res.json();
-      setImageUrl(data.imageUrl);
+
+      if (!data.images) {
+        throw new Error("No images returned");
+      }
+
+      setImages(data.images);
     } catch (err) {
+      console.error(err);
       setError("Failed to generate logo. Try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownload = async (url, index) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `logo-${index + 1}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
     }
   };
 
@@ -41,17 +72,15 @@ export default function Melostudio() {
     <section className="ai-page">
       <div className="ai-header">
         <h1>AI Logo Generator</h1>
-        <p>
-          Describe your brand and let AI create professional logos instantly
-        </p>
+        <p>Describe your brand and let AI create professional logos instantly</p>
       </div>
 
       <div className="ai-card">
         <label>Describe your logo</label>
         <textarea
-          placeholder="A minimal pink logo for a beauty brand on Instagram, elegant and modern with soft curves"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
+          placeholder="A minimal pink logo for a beauty brand"
         />
 
         <h4>Choose your style</h4>
@@ -62,13 +91,11 @@ export default function Melostudio() {
             { name: "Luxury", desc: "Elegant and premium" },
             { name: "Modern", desc: "Bold and contemporary" },
             { name: "Playful", desc: "Fun and friendly" },
-            { name: "Tech", desc: "Innovative and digital" }
+            { name: "Tech", desc: "Innovative and digital" },
           ].map((item) => (
             <button
               key={item.name}
-              className={`style-card ${
-                style === item.name ? "active" : ""
-              }`}
+              className={`style-card ${style === item.name ? "active" : ""}`}
               onClick={() => setStyle(item.name)}
               type="button"
             >
@@ -83,14 +110,25 @@ export default function Melostudio() {
           onClick={generateLogo}
           disabled={loading}
         >
-          {loading ? "✨ Generating logo..." : "✨ Generate Logo"}
+          {loading ? "Generating logos..." : "Generate Logos"}
         </button>
 
         {error && <p className="error-text">{error}</p>}
 
-        {imageUrl && (
-          <div className="result-box">
-            <img src={imageUrl} alt="Generated logo" />
+        {images.length > 0 && (
+          <div className="result-grid">
+            {images.map((img, index) => (
+              <div key={index} className="logo-tile">
+                <img src={img} alt={`Logo ${index + 1}`} />
+
+                <button
+                  className="download-btn"
+                  onClick={() => handleDownload(img, index)}
+                >
+                  <FiDownload size={18} />
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>

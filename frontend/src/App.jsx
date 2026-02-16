@@ -72,7 +72,7 @@ function App() {
             </RequireAuth>
           }
         />
-
+      {
         <Route
           path="/melostudio"
           element={
@@ -83,6 +83,9 @@ function App() {
             </RequireAuth>
           }
         />
+      }
+       
+      <Route path="/melostudio" element={<Melostudio />} />
 
         <Route
           path="/success"
