@@ -58,6 +58,7 @@ app.use("/api", protectedRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/generate", generateRoutes);
 
+
 /* 🧪 Health Check */
 app.get("/", (req, res) => {
   res.json({

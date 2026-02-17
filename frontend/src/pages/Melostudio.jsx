@@ -36,7 +36,7 @@ export default function Melostudio() {
 
       const data = await res.json();
 
-      if (!data.images) {
+      if (!data.images || data.images.length === 0) {
         throw new Error("No images returned");
       }
 
@@ -49,24 +49,41 @@ export default function Melostudio() {
     }
   };
 
+  // ✅ Direct Download (User already paid)
   const handleDownload = async (url, index) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
+  try {
+    const res = await fetch("http://localhost:5000/api/generate/download-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl: url }),
+    });
 
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `logo-${index + 1}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("Download failed:", error);
+    if (!res.ok) {
+      throw new Error("Download failed");
     }
-  };
+
+    const blob = await res.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `melo-logo-${index + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(blobUrl);
+
+  } catch (error) {
+    console.error("Download error:", error);
+    alert("Download failed");
+  }
+};
+
+
+
 
   return (
     <section className="ai-page">
