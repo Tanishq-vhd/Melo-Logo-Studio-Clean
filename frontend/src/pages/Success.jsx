@@ -6,11 +6,12 @@ export default function Success() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let timer;
+
     const verifyAccess = async () => {
       try {
         const res = await getProfile();
 
-        // ❌ invalid session
         if (
           res?.message === "Invalid or expired token" ||
           res?.message === "No token provided"
@@ -19,71 +20,109 @@ export default function Success() {
           return;
         }
 
-        // ❌ not paid (extra safety)
         const isPaid = localStorage.getItem("isPaid");
         if (isPaid !== "true") {
           navigate("/payment");
           return;
         }
 
-        // ✅ auto redirect to AI tools
-        setTimeout(() => {
-          navigate("/ai-tools");
+        timer = setTimeout(() => {
+          navigate("/melostudio");
         }, 2000);
-      } catch {
+      } catch (error) {
         navigate("/signin");
       }
     };
 
     verifyAccess();
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [navigate]);
 
   return (
-    <section
+    <div
       style={{
         minHeight: "100vh",
+        background: "#f6eef2",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#fff5f9",
       }}
     >
       <div
         style={{
-          background: "#fff",
-          padding: "48px",
-          borderRadius: "24px",
+          background: "#ffffff",
+          padding: "60px 50px",
+          borderRadius: "28px",
           textAlign: "center",
-          boxShadow: "0 40px 80px rgba(0,0,0,0.12)",
-          maxWidth: "420px",
+          width: "420px",
+          boxShadow: "0 30px 80px rgba(0,0,0,0.08)",
         }}
       >
-        <div style={{ fontSize: "48px" }}>✅</div>
+        <div
+          style={{
+            width: "60px",
+            height: "60px",
+            background: "#34d399",
+            borderRadius: "12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto",
+            color: "#fff",
+            fontSize: "30px",
+            fontWeight: "bold",
+          }}
+        >
+          ✓
+        </div>
 
-        <h1 style={{ marginTop: "16px", fontSize: "26px" }}>
-          Premium activated 🎉
+        <h1
+          style={{
+            marginTop: "28px",
+            fontSize: "36px",
+            fontWeight: "700",
+            color: "#111827",
+            lineHeight: "1.2",
+          }}
+        >
+          Premium
+          <br />
+          activated
         </h1>
 
-        <p style={{ color: "#6b7280", marginTop: "12px" }}>
-          Your payment was successful. Redirecting you to AI tools…
+        <div style={{ fontSize: "28px", marginTop: "12px" }}>🎉</div>
+
+        <p
+          style={{
+            marginTop: "20px",
+            color: "#6b7280",
+            fontSize: "15px",
+            lineHeight: "1.6",
+          }}
+        >
+          Your payment was successful. You can now create unlimited logos.
         </p>
 
         <button
-          onClick={() => navigate("/ai-tools")}
+          onClick={() => navigate("/melostudio")}
           style={{
-            marginTop: "28px",
+            marginTop: "30px",
             background: "#ec4899",
             color: "#fff",
             border: "none",
-            borderRadius: "14px",
-            padding: "16px 32px",
-            fontWeight: 600,
+            borderRadius: "16px",
+            padding: "14px 28px",
+            fontWeight: "600",
+            fontSize: "14px",
             cursor: "pointer",
           }}
         >
-          Go to AI tools now
+          Create my first logo
         </button>
       </div>
-    </section>
+    </div>
   );
 }
