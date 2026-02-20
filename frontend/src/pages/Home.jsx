@@ -28,7 +28,7 @@ const logos = [
   { title: "Tech Startup", img: tech, path: "/tech" },
   { title: "Food Brand", img: food, path: "/food-brand" },
   { title: "Skincare", img: skincareImg, path: "/skincare" },
-  { title: "Pet Supplies", img: petsupplies, path: "/signup" }, // Redirect to signup if no page exists
+  { title: "Pet Supplies", img: petsupplies, path: "/pet-supplies" }, // Updated from /signup to /pet-supplies
 ];
 
 export default function Home() {

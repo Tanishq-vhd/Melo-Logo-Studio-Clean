@@ -19,6 +19,8 @@ const Bakery = lazy(() => import("./pages/Bakery"));
 const Jewellery = lazy(() => import("./pages/Jewellery"));
 const FoodBrand = lazy(() => import("./pages/FoodBrand"));
 const Skincare = lazy(() => import("./pages/Skincare"));
+const Tech = lazy(() => import("./pages/Tech"));
+const PetSupplies = lazy(() => import("./pages/PetSupplies"));
 
 /* 🔐 Auth Wrappers */
 const RequireAuth = ({ children }) => {
@@ -35,7 +37,11 @@ const RequirePayment = ({ children }) => {
   return children;
 };
 
-const Loader = () => <div style={{ padding: "50px", textAlign: "center" }}>Loading...</div>;
+const Loader = () => (
+  <div style={{ padding: "100px", textAlign: "center", fontSize: "1.2rem", color: "#ff4d94" }}>
+    Loading Component...
+  </div>
+);
 
 function App() {
   return (
@@ -51,7 +57,9 @@ function App() {
           <Route path="/jewellery" element={<Jewellery />} />
           <Route path="/food-brand" element={<FoodBrand />} />
           <Route path="/skincare" element={<Skincare />} />
-          
+          <Route path="/tech" element={<Tech />} />
+          <Route path="/pet-supplies" element={<PetSupplies />} />
+
           {/* 📄 Legal & Info */}
           <Route path="/privacy-policy" element={<Privacy />} />
           <Route path="/terms-of-use" element={<TermsOfUse />} />
@@ -63,9 +71,39 @@ function App() {
 
           {/* 💳 Protected Premium Routes */}
           <Route path="/payment" element={<RequireAuth><Payment /></RequireAuth>} />
-          <Route path="/maxx" element={<RequireAuth><RequirePayment><Maxx /></RequirePayment></RequireAuth>} />
-          <Route path="/melostudio" element={<RequireAuth><RequirePayment><Melostudio /></RequirePayment></RequireAuth>} />
-          <Route path="/success" element={<RequireAuth><RequirePayment><Success /></RequirePayment></RequireAuth>} />
+          
+          <Route 
+            path="/maxx" 
+            element={
+              <RequireAuth>
+                <RequirePayment>
+                  <Maxx />
+                </RequirePayment>
+              </RequireAuth>
+            } 
+          />
+          
+          <Route 
+            path="/melostudio" 
+            element={
+              <RequireAuth>
+                <RequirePayment>
+                  <Melostudio />
+                </RequirePayment>
+              </RequireAuth>
+            } 
+          />
+          
+          <Route 
+            path="/success" 
+            element={
+              <RequireAuth>
+                <RequirePayment>
+                  <Success />
+                </RequirePayment>
+              </RequireAuth>
+            } 
+          />
 
           {/* 🔁 Redirect any unknown routes to Home */}
           <Route path="*" element={<Navigate to="/" replace />} />
