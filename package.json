@@ -1,0 +1,8 @@
+{
+  "name": "melo-logo-studio-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "cd backend && npm install && node server.js"
+  }
+}
