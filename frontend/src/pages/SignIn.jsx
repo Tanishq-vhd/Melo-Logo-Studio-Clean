@@ -17,37 +17,75 @@ export default function SignIn() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Use your Live Render URL
+  const API_URL = "https://melo-logo-studio.onrender.com";
+
+  /* 🔄 Helper: Check real payment status from Backend */
+  const checkPaymentAndNavigate = async (email, token) => {
+    try {
+      const res = await fetch(`${API_URL}/api/payment/check-status/${email}`);
+      const data = await res.json();
+
+      const isPaid = data.success ? data.isPaid : false;
+
+      // ✅ Save to local storage with 'isPaid' to match App.jsx
+      localStorage.setItem("user", JSON.stringify({ email, isPaid }));
+      localStorage.setItem("token", token);
+
+      // ✅ Smart Redirect
+      if (isPaid) {
+        navigate("/melostudio");
+      } else {
+        navigate("/payment");
+      }
+    } catch (err) {
+      console.error("Status check failed:", err);
+      navigate("/payment");
+    }
+  };
+
+  /* HANDLE REDIRECT RESULT */
   /* ===============================
       HANDLE REDIRECT RESULT
   ================================ */
   useEffect(() => {
+    // Move the helper inside to satisfy the dependency rule
+    const checkPaymentAndNavigate = async (email, token) => {
+      try {
+        const res = await fetch(`${API_URL}/api/payment/check-status/${email}`);
+        const data = await res.json();
+
+        const isPaid = data.success ? data.isPaid : false;
+
+        localStorage.setItem("user", JSON.stringify({ email, isPaid }));
+        localStorage.setItem("token", token);
+
+        if (isPaid) {
+          navigate("/melostudio");
+        } else {
+          navigate("/payment");
+        }
+      } catch (err) {
+        console.error("Status check failed:", err);
+        navigate("/payment");
+      }
+    };
+
     getRedirectResult(auth)
       .then(async (result) => {
         if (!result) return;
-
         const user = result.user;
         const idToken = await user.getIdToken();
-
-        localStorage.setItem("token", idToken);
-        
-        // Default for new social sign-ins, though your backend 
-        // should ideally provide the real status here.
-        const userData = { email: user.email, isPremium: false };
-        localStorage.setItem("user", JSON.stringify(userData));
-
-        navigate("/payment");
+        await checkPaymentAndNavigate(user.email, idToken);
       })
       .catch((err) => {
         console.error("Redirect error:", err);
         setError(err.message);
       });
-  }, [navigate]);
+  }, [navigate]); // API_URL is a constant, so it doesn't need to be here
 
-  /* ===============================
-      EMAIL / PASSWORD LOGIN
-  ================================ */
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  /* EMAIL / PASSWORD LOGIN */
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,20 +95,16 @@ export default function SignIn() {
     try {
       const res = await loginUser(form);
       if (res.token) {
-        // 1. Save Token
+        // Use the API response but double-check field name
+        const isPaid = res.user?.isPaid || res.user?.isPremium || false;
+        
         localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify({ 
+          email: res.user?.email, 
+          isPaid: isPaid 
+        }));
 
-        // 2. Save User Object with isPremium field
-        // Ensure your backend login API returns 'isPremium' and 'user' object
-        const userData = {
-          _id: res.user?._id,
-          email: res.user?.email,
-          isPremium: res.user?.isPremium || false // Match MongoDB field
-        };
-        localStorage.setItem("user", JSON.stringify(userData));
-
-        // 3. Smart Redirect: If premium, go to studio. If not, go to home/payment.
-        if (userData.isPremium) {
+        if (isPaid) {
           navigate("/melostudio");
         } else {
           navigate("/");
@@ -79,33 +113,26 @@ export default function SignIn() {
         setError(res.message || "Login failed");
       }
     } catch (err) {
-      setError("Something went wrong. Please check your credentials.");
+      setError("Login failed. Check your credentials.");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ===============================
-      GOOGLE SIGN IN
-  ================================ */
+  /* GOOGLE SIGN IN */
   const handleGoogleSignIn = async () => {
     setError("");
     setLoading(true);
 
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
-
-      localStorage.setItem("token", idToken);
+      const idToken = await result.user.getIdToken();
       
-      // Note: For Google Sign-in, you should ideally call your backend 
-      // to check if this Google user is already premium in your DB.
-      localStorage.setItem("user", JSON.stringify({ email: user.email, isPremium: false }));
-
-      navigate("/payment");
+      // ✅ Fetch the real status from MongoDB instead of assuming false
+      await checkPaymentAndNavigate(result.user.email, idToken);
+      
     } catch (err) {
-      if (err.code === "auth/popup-blocked" || err.code === "auth/cancelled-popup-request") {
+      if (err.code === "auth/popup-blocked") {
         await signInWithRedirect(auth, googleProvider);
       } else {
         setError(err.message);
@@ -119,14 +146,11 @@ export default function SignIn() {
       <div className="auth-card">
         <img src={logo} alt="Melo Logo Studio" className="auth-logo-img" />
         <h1>Sign in</h1>
-
         <button type="button" className="google-btn" onClick={handleGoogleSignIn} disabled={loading}>
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" />
           Continue with Google
         </button>
-
         <div className="auth-divider"><span>or</span></div>
-
         <form className="auth-form" onSubmit={handleSubmit}>
           <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
           <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
@@ -134,7 +158,6 @@ export default function SignIn() {
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
-
         {error && <p className="auth-error">{error}</p>}
         <p className="auth-footer">
           Don’t have an account? <Link to="/signup">Create an account</Link>

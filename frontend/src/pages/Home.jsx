@@ -73,13 +73,16 @@ export default function Home() {
   }, []);
 
   const handlePlusClick = () => {
-    const isPaid = localStorage.getItem("isPaid");
-    if (isPaid === "true") {
-      fileInputRef.current.click();
-    } else {
-      navigate("/signup");
-    }
-  };
+  const userData = localStorage.getItem("user");
+  const user = userData ? JSON.parse(userData) : null;
+
+  // FIX: Check the isPaid property inside the user object
+  if (user && user.isPaid) {
+    fileInputRef.current.click();
+  } else {
+    navigate("/signup");
+  }
+};
 
   const handleGenerate = () => {
     if (inputValue.trim() || placeholder) {

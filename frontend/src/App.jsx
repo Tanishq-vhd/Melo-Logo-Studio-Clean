@@ -31,18 +31,18 @@ const RequireAuth = ({ children }) => {
 };
 
 /* 💎 Payment Wrapper: Checks if user has Premium status */
+/* 💎 Payment Wrapper: Checks if user has Paid status */
 const RequirePayment = ({ children }) => {
   const userData = localStorage.getItem("user");
   const user = userData ? JSON.parse(userData) : null;
 
-  // CHANGED: Changed 'isPaid' to 'isPremium' to match your MongoDB field
-  if (!user || !user.isPremium) {
+  // FIX: Changed 'isPremium' back to 'isPaid' to match your server.js logic
+  if (!user || !user.isPaid) {
     return <Navigate to="/payment" replace />;
   }
   
   return children;
 };
-
 const Loader = () => (
   <div style={{ padding: "100px", textAlign: "center", fontSize: "1.2rem", color: "#ff4d94" }}>
     Loading Component...

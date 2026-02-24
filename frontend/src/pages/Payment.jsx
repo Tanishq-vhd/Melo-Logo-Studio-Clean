@@ -53,41 +53,45 @@ export default function Payment() {
         name: "Melo Logo Studio",
         order_id: order.id,
         handler: async function (response) {
-          try {
-            // 3️⃣ Verify and Upgrade on Backend
-            const verifyRes = await fetch(`${API_URL}/api/payment/verify-and-upgrade`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                email: user.email,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              }),
-            });
+  try {
+    // 1️⃣ Verify the payment with your backend
+    const verifyRes = await fetch(`${API_URL}/api/payment/verify-and-upgrade`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        email: user.email,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature
+      }),
+    });
 
-            const data = await verifyRes.json();
+    const data = await verifyRes.json();
 
-            if (verifyRes.ok && data.success) {
-              // ✅ Update Local Storage so the app knows you paid
-              const userData = JSON.parse(localStorage.getItem("user") || "{}");
-              userData.isPaid = true; 
-              localStorage.setItem("user", JSON.stringify(userData));
-              
-              // ✅ Redirect to studio
-              navigate("/melostudio"); 
-            } else {
-              alert(data.message || "Verification failed");
-            }
-          } catch (err) {
-            alert("Payment verified, but server update failed. Contact support.");
-          } finally {
-            setLoading(false);
-          }
-        },
+    if (verifyRes.ok && data.success) {
+      // 2️⃣ SUCCESS LOGIC: Update local storage
+      // We use 'isPaid' here to match your App.jsx requirement
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+      userData.isPaid = true; 
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      console.log("✅ Payment Verified. Upgrading user...");
+
+      // 3️⃣ Redirect to the studio dashboard
+      navigate("/melostudio"); 
+    } else {
+      alert(data.message || "Payment verification failed.");
+      setLoading(false);
+    }
+  } catch (err) {
+    console.error("Verification error:", err);
+    alert("Server error during verification. Please contact support.");
+    setLoading(false);
+  }
+},
         prefill: { email: user.email },
         theme: { color: "#ff2f7d" },
       };
