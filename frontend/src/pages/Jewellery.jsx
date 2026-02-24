@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./Explore.css";
 
-// Asset Imports
+/* Asset Imports */
 import jBase from "../assets/images/Jewellery.jpg";
 import j1 from "../assets/images/Jewellery 1.jpg";
 import j2 from "../assets/images/Jewellery 2.jpg";
@@ -55,7 +55,7 @@ const Jewellery = () => {
             className="preview-card"
             onClick={() => navigate("/payment")}
           >
-            <img src={img} alt={`Jewellery ${index}`} />
+            <img src={img} alt={`Jewellery Logo ${index}`} />
             <div className="watermark">MELO</div>
           </div>
         ))}
@@ -64,4 +64,4 @@ const Jewellery = () => {
   );
 };
 
-export default Jewellery; // This must be at the very bottom
+export default Jewellery;

@@ -2,10 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./Explore.css";
 
-// Base image
+/* Asset Imports - Tech 1 to Tech 25 */
 import techBase from "../assets/images/tech.jpg";
-
-// Individual imports (Check your folder for exact spelling/spaces!)
 import t1 from "../assets/images/Tech 1.jpg";
 import t2 from "../assets/images/Tech 2.jpg";
 import t3 from "../assets/images/Tech 3.jpg";
@@ -17,8 +15,8 @@ import t8 from "../assets/images/Tech 8.jpg";
 import t9 from "../assets/images/Tech 9.jpg";
 import t10 from "../assets/images/Tech 10.jpg";
 import t11 from "../assets/images/Tech 11.jpg";
-import t12 from "../assets/images/Tech 12.jpg"; 
-import t13 from "../assets/images/Tech 13.jpg"; 
+import t12 from "../assets/images/Tech 12.jpg";
+import t13 from "../assets/images/Tech 13.jpg";
 import t14 from "../assets/images/Tech 14.jpg";
 import t15 from "../assets/images/Tech 15.jpg";
 import t16 from "../assets/images/Tech 16.jpg";
@@ -32,7 +30,7 @@ import t23 from "../assets/images/Tech 23.jpg";
 import t24 from "../assets/images/Tech 24.jpg";
 import t25 from "../assets/images/Tech 25.jpg";
 
-const Tech = () => {
+export default function Tech() {
   const navigate = useNavigate();
 
   const images = [
@@ -41,28 +39,25 @@ const Tech = () => {
   ];
 
   return (
-    <div className="explore-container"> {/* Changed to generic container */}
-      <div className="category-header">
-        <button className="back-btn" onClick={() => navigate("/")}>
-          ← Back
-        </button>
-        <h2>Tech Startup Logos</h2>
-      </div>
+    <div className="beauty-page"> 
+      <button className="back-btn" onClick={() => navigate("/")}>
+        ← Back
+      </button>
 
-      <div className="logo-grid"> {/* Use existing Home.jsx grid class for consistency */}
+      <h2>Tech Startup Logos</h2>
+
+      <div className="preview-grid">
         {images.map((img, index) => (
           <div
             key={index}
-            className="logo-card" 
+            className="preview-card"
             onClick={() => navigate("/payment")}
           >
-            <img src={img} alt={`Tech ${index}`} loading="lazy" />
+            <img src={img} alt={`Tech Logo ${index}`} />
             <div className="watermark">MELO</div>
           </div>
         ))}
       </div>
     </div>
   );
-};
-
-export default Tech;
+}

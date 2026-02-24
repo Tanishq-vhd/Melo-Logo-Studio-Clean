@@ -1,14 +1,26 @@
 {
-  "name": "melo-logo-studio-root",
-  "version": "1.0.0",
+  "name": "instastudio-backend",
   "type": "module",
+  "version": "1.0.0",
+  "main": "server.js",
   "scripts": {
-    "backend": "cd backend && npm start",
-    "frontend": "cd frontend && npm start",
-    "dev": "some-command"
+    "start": "node -r dotenv/config server.js",
+    "dev": "nodemon server.js"
+
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
     "dotenv": "^17.3.1",
-    "express": "^5.2.1"
+    "express": "^4.22.1",
+    "firebase-admin": "^13.6.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.1.5",
+    "node-fetch": "^3.3.2",
+    "openai": "^6.22.0",
+    "razorpay": "^2.9.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }

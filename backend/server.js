@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
-dotenv.config(); 
+dotenv.config();
+
+import "./Firebase.js";
 
 import express from "express";
 import mongoose from "mongoose";
