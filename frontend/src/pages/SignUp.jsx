@@ -31,8 +31,17 @@ export default function SignUp() {
       const res = await signupUser(form);
 
       if (res?.token) {
+        // 1. Save Token
         localStorage.setItem("token", res.token);
-        localStorage.setItem("isPaid", "false");
+
+        // 2. ✅ Initialize the user object with isPaid: false
+        // This ensures the RequirePayment wrapper in App.jsx works correctly
+        const userData = { 
+          email: res.user?.email || form.email, 
+          isPaid: false 
+        };
+        localStorage.setItem("user", JSON.stringify(userData));
+
         navigate("/payment");
       } else {
         setError(res?.message || "Signup failed");
@@ -63,8 +72,16 @@ export default function SignUp() {
       });
 
       if (res?.token) {
+        // 1. Save Token
         localStorage.setItem("token", res.token);
-        localStorage.setItem("isPaid", "false");
+
+        // 2. ✅ Initialize Google user object with isPaid: false
+        const userData = { 
+          email: user.email, 
+          isPaid: false 
+        };
+        localStorage.setItem("user", JSON.stringify(userData));
+
         navigate("/payment");
       } else {
         setError(res?.message || "Google signup failed");
