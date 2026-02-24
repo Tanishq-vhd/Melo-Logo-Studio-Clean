@@ -1,18 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase"; // ✅ CRITICAL: Use the initialized instance
+import { auth } from "../firebase"; // ✅ Imports must be at the very top
 
 export default function Payment() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  // ✅ SAFE environment variable handling
-  const API_URL_RAW = process.env.REACT_APP_API_URL;
+  // ✅ Environment variable handling
+  const API_URL_RAW = process.env.REACT_APP_API_URL || "https://melo-logo-studio.onrender.com";
   const API_URL = API_URL_RAW ? API_URL_RAW.replace(/\/$/, "") : "";
   const RAZORPAY_KEY = process.env.REACT_APP_RAZORPAY_KEY || "rzp_live_SCtpMpqcflvzA0";
 
   const handlePayment = async () => {
-    console.log("Button clicked");
     if (loading) return;
 
     if (!API_URL || !RAZORPAY_KEY) {
@@ -37,7 +36,6 @@ export default function Payment() {
         return;
       }
 
-      // ✅ Get a fresh token to avoid "id-token-expired" errors
       const token = await user.getIdToken(true);
 
       // 1️⃣ Create the Order on the Backend
@@ -69,28 +67,35 @@ export default function Payment() {
         order_id: order.id,
         handler: async function (response) {
           try {
-            // 3️⃣ Verify Payment on the Backend
-            const verifyRes = await fetch(`${API_URL}/api/payment/verify-payment`, {
+            // 3️⃣ Verify Payment on the Backend using the NEW endpoint
+            const verifyRes = await fetch(`${API_URL}/api/payment/verify-and-upgrade`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
-              body: JSON.stringify(response),
+              body: JSON.stringify({
+                email: user.email,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              }),
             });
 
-            if (!verifyRes.ok) {
-              alert("Payment verification failed.");
+            const data = await verifyRes.json();
+
+            if (!verifyRes.ok || !data.success) {
+              alert(data.message || "Payment verification failed.");
               setLoading(false);
               return;
             }
 
-            // ✅ SUCCESS: Update local storage to isPremium
+            // ✅ SUCCESS: Update local storage
             const userData = JSON.parse(localStorage.getItem("user") || "{}");
-            userData.isPremium = true; 
+            userData.isPaid = true; 
             localStorage.setItem("user", JSON.stringify(userData));
             
-            navigate("/ai-tools");
+            navigate("/melostudio"); 
           } catch (err) {
             console.error("Verification error:", err);
             alert("Verification failed.");
