@@ -3,7 +3,7 @@ import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 
-// Lazy loading pages - Ensure these filenames match your folder exactly (Case Sensitive!)
+// Lazy loading pages
 const Home = lazy(() => import("./pages/Home"));
 const Melostudio = lazy(() => import("./pages/Melostudio"));
 const Maxx = lazy(() => import("./pages/Maxx"));
@@ -30,19 +30,20 @@ const RequireAuth = ({ children }) => {
   return children;
 };
 
-/* 💎 Payment Wrapper: Checks if user has Premium status */
 /* 💎 Payment Wrapper: Checks if user has Paid status */
 const RequirePayment = ({ children }) => {
   const userData = localStorage.getItem("user");
   const user = userData ? JSON.parse(userData) : null;
 
-  // FIX: Changed 'isPremium' back to 'isPaid' to match your server.js logic
-  if (!user || !user.isPaid) {
+  // ✅ LOGIC FIX: Check for 'isPaid' to match your MongoDB and server.js update logic
+  // We use strict equality to ensure it's specifically true
+  if (!user || user.isPaid !== true) {
     return <Navigate to="/payment" replace />;
   }
   
   return children;
 };
+
 const Loader = () => (
   <div style={{ padding: "100px", textAlign: "center", fontSize: "1.2rem", color: "#ff4d94" }}>
     Loading Component...
@@ -55,7 +56,7 @@ function App() {
       <Navbar />
       <Suspense fallback={<Loader />}>
         <Routes>
-          {/* 🌍 Public Category Routes */}
+          {/* 🌍 Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/beauty-brand" element={<BeautyBrand />} />
           <Route path="/fashion" element={<Fashion />} />
@@ -65,19 +66,18 @@ function App() {
           <Route path="/skincare" element={<Skincare />} />
           <Route path="/tech" element={<Tech />} />
           <Route path="/pet-supplies" element={<PetSupplies />} />
-
-          {/* 📄 Legal & Info */}
           <Route path="/privacy-policy" element={<Privacy />} />
           <Route path="/terms-of-use" element={<TermsOfUse />} />
           <Route path="/about" element={<AboutUs />} />
 
-          {/* 🔓 Auth */}
+          {/* 🔓 Auth Routes */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
 
-          {/* 💳 Protected Premium Routes */}
+          {/* 💳 Payment Page: Only requires Auth, not Payment */}
           <Route path="/payment" element={<RequireAuth><Payment /></RequireAuth>} />
           
+          {/* 🚀 Premium Protected Routes: Requires BOTH Auth and Payment */}
           <Route 
             path="/maxx" 
             element={
@@ -111,7 +111,7 @@ function App() {
             } 
           />
 
-          {/* 🔁 Redirect any unknown routes to Home */}
+          {/* 🔁 Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

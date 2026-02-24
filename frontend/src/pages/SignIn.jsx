@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/api";
 import logo from "../assets/images/logo.jpg";
@@ -20,19 +20,19 @@ export default function SignIn() {
   // Use your Live Render URL
   const API_URL = "https://melo-logo-studio.onrender.com";
 
-  /* 🔄 Helper: Check real payment status from Backend */
-  const checkPaymentAndNavigate = async (email, token) => {
+  /* 🔄 Helper: Check real payment status from Backend and Navigate */
+  // wrapped in useCallback to prevent the useEffect warning
+  const checkPaymentAndNavigate = useCallback(async (email, token) => {
     try {
       const res = await fetch(`${API_URL}/api/payment/check-status/${email}`);
       const data = await res.json();
 
+      // Ensure we use 'isPaid' to match App.jsx
       const isPaid = data.success ? data.isPaid : false;
 
-      // ✅ Save to local storage with 'isPaid' to match App.jsx
       localStorage.setItem("user", JSON.stringify({ email, isPaid }));
       localStorage.setItem("token", token);
 
-      // ✅ Smart Redirect
       if (isPaid) {
         navigate("/melostudio");
       } else {
@@ -42,35 +42,12 @@ export default function SignIn() {
       console.error("Status check failed:", err);
       navigate("/payment");
     }
-  };
+  }, [navigate]);
 
-  /* HANDLE REDIRECT RESULT */
   /* ===============================
       HANDLE REDIRECT RESULT
   ================================ */
   useEffect(() => {
-    // Move the helper inside to satisfy the dependency rule
-    const checkPaymentAndNavigate = async (email, token) => {
-      try {
-        const res = await fetch(`${API_URL}/api/payment/check-status/${email}`);
-        const data = await res.json();
-
-        const isPaid = data.success ? data.isPaid : false;
-
-        localStorage.setItem("user", JSON.stringify({ email, isPaid }));
-        localStorage.setItem("token", token);
-
-        if (isPaid) {
-          navigate("/melostudio");
-        } else {
-          navigate("/payment");
-        }
-      } catch (err) {
-        console.error("Status check failed:", err);
-        navigate("/payment");
-      }
-    };
-
     getRedirectResult(auth)
       .then(async (result) => {
         if (!result) return;
@@ -82,9 +59,11 @@ export default function SignIn() {
         console.error("Redirect error:", err);
         setError(err.message);
       });
-  }, [navigate]); // API_URL is a constant, so it doesn't need to be here
+  }, [checkPaymentAndNavigate]);
 
-  /* EMAIL / PASSWORD LOGIN */
+  /* ===============================
+      EMAIL / PASSWORD LOGIN
+  ================================ */
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
@@ -95,20 +74,8 @@ export default function SignIn() {
     try {
       const res = await loginUser(form);
       if (res.token) {
-        // Use the API response but double-check field name
-        const isPaid = res.user?.isPaid || res.user?.isPremium || false;
-        
-        localStorage.setItem("token", res.token);
-        localStorage.setItem("user", JSON.stringify({ 
-          email: res.user?.email, 
-          isPaid: isPaid 
-        }));
-
-        if (isPaid) {
-          navigate("/melostudio");
-        } else {
-          navigate("/");
-        }
+        // Fetch the most up-to-date status from our source of truth (the DB)
+        await checkPaymentAndNavigate(res.user?.email, res.token);
       } else {
         setError(res.message || "Login failed");
       }
@@ -119,7 +86,9 @@ export default function SignIn() {
     }
   };
 
-  /* GOOGLE SIGN IN */
+  /* ===============================
+      GOOGLE SIGN IN
+  ================================ */
   const handleGoogleSignIn = async () => {
     setError("");
     setLoading(true);
