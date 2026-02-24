@@ -55,7 +55,7 @@ export default function Payment() {
         handler: async function (response) {
   try {
     // 1️⃣ Verify the payment with your backend
-    const verifyRes = await fetch(`${API_URL}/api/payment/verify-and-upgrade`, {
+    const verifyRes = await fetch(`${API_URL}/api/payment/verify-payment`,  {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
