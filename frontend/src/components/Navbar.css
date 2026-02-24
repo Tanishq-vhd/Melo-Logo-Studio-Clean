@@ -1,0 +1,88 @@
+.navbar {
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f1f1;
+  position: relative;       /* ✅ FIX 1 */
+  z-index: 1000;             /* ✅ FIX 1 */
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;                 /* ✅ FIX 2 */
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #111;
+  white-space: nowrap;
+}
+
+.nav-links {
+  display: flex;
+  gap: 28px;
+  flex-wrap: nowrap;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.nav-links a.active {
+  color: #ff4da6;
+  border-bottom: 2px solid #ff4da6;
+  padding-bottom: 4px;
+}
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  white-space: nowrap;       /* ✅ FIX 2 */
+}
+
+.signin {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.signup {
+  background: #ff4da6;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 24px;
+  text-decoration: none;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.3px;
+}
+

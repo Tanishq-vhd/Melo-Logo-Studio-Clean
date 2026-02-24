@@ -1,0 +1,44 @@
+.creators {
+  margin: 140px 0;
+  text-align: center;
+}
+
+.creators h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.creators p {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 50px;
+}
+
+.creators-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+
+.creator-card {
+  background: #fff5fa;
+  border-radius: 18px;
+  padding: 30px 24px;
+  color: #111;
+}
+
+.creator-card svg {
+  color: #ff4da6;
+  margin-bottom: 14px;
+}
+
+.creator-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.creator-card p {
+  font-size: 14px;
+  color: #666;
+}

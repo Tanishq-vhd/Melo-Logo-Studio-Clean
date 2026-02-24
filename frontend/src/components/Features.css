@@ -1,0 +1,47 @@
+.features {
+  margin: 120px 0;
+  text-align: center;
+}
+
+.features h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 60px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+
+.feature-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 16px;
+  border-radius: 12px;
+  background: #fff0f7;
+  color: #ff4da6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.feature-card p {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}

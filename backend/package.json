@@ -1,0 +1,13 @@
+{
+  "name": "melo-logo-studio-root",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "backend": "cd backend && npm start",
+    "frontend": "cd frontend && npm start",
+    "dev": "some-command"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1"
+  }
+}
