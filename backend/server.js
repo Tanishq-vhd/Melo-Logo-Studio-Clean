@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+// Initialize Firebase immediately after loading env variables
 import "./Firebase.js"; 
 
 import express from "express";
@@ -14,6 +15,7 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
   process.exit(1);
 }
 
+// Import Routes
 import authRoutes from "./routes/auth.js";
 import protectedRoutes from "./routes/protected.js";
 import paymentRoutes from "./routes/payment.js";
@@ -22,6 +24,7 @@ import generateRoutes from "./routes/generate.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// CORS configuration for production
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
@@ -41,11 +44,24 @@ app.use(cors({
   credentials: true,
 }));
 
-// Webhook raw body handling
+// Webhook raw body handling (Must be before express.json)
 app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 app.use(express.json());
 
-// --- 🔄 IMPROVED: PAYMENT VERIFICATION & STATUS UPDATE ---
+// --- 🔍 NEW: CHECK STATUS ROUTE ---
+// Frontend can call this to see if the user is already paid
+app.get("/api/payment/check-status/:email", async (req, res) => {
+  try {
+    const user = await mongoose.connection.collection("users").findOne({ email: req.params.email });
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    
+    res.json({ success: true, isPaid: user.isPaid || false });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- 🔄 PAYMENT VERIFICATION & STATUS UPDATE ---
 app.post("/api/payment/verify-and-upgrade", async (req, res) => {
   const { email, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
@@ -56,15 +72,13 @@ app.post("/api/payment/verify-and-upgrade", async (req, res) => {
     .update(body.toString())
     .digest("hex");
 
-  const isSignatureValid = expectedSignature === razorpay_signature;
-
-  if (!isSignatureValid) {
+  if (expectedSignature !== razorpay_signature) {
     console.error("❌ Payment verification failed: Invalid Signature");
     return res.status(400).json({ success: false, message: "Payment verification failed." });
   }
 
   try {
-    // 2. Update Database using standard Mongoose update
+    // 2. Update Database
     const result = await mongoose.connection.collection("users").updateOne(
       { email: email },
       { $set: { isPaid: true, lastPaymentId: razorpay_payment_id, updatedAt: new Date() } }
@@ -82,14 +96,16 @@ app.post("/api/payment/verify-and-upgrade", async (req, res) => {
   }
 });
 
-// Existing Routes
+// Use Routes
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/generate", generateRoutes);
 
+// Base Health Check
 app.get("/", (req, res) => res.send("🚀 Melo Logo Studio Backend is Live!"));
 
+// MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB connected");
