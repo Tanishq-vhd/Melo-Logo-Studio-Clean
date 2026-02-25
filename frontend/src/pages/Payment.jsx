@@ -95,7 +95,7 @@ export default function Payment() {
             userData.isPaid = true; 
             localStorage.setItem("user", JSON.stringify(userData));
             
-            navigate("/melostudio"); 
+            navigate("/payment-success"); 
           } catch (err) {
             console.error("Verification error:", err);
             alert("Verification failed.");

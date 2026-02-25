@@ -2,6 +2,7 @@ import "./firebase";
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 // Lazy loading pages
 const Home = lazy(() => import("./pages/Home"));
@@ -69,6 +70,7 @@ function App() {
           <Route path="/privacy-policy" element={<Privacy />} />
           <Route path="/terms-of-use" element={<TermsOfUse />} />
           <Route path="/about" element={<AboutUs />} />
+          
 
           {/* 🔓 Auth Routes */}
           <Route path="/signin" element={<SignIn />} />
@@ -77,6 +79,14 @@ function App() {
           {/* 💳 Payment Page: Only requires Auth, not Payment */}
           <Route path="/payment" element={<RequireAuth><Payment /></RequireAuth>} />
           
+          <Route 
+           path="/payment-success" 
+           element={
+              <RequireAuth>
+                <PaymentSuccess />
+              </RequireAuth>
+           } 
+          />
           {/* 🚀 Premium Protected Routes: Requires BOTH Auth and Payment */}
           <Route 
             path="/maxx" 
