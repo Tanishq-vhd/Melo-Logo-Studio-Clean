@@ -1,11 +1,19 @@
 import "./Maxx.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadRazorpay } from "../services/razorpay";
 
 export default function Maxx() {
   const navigate = useNavigate();
   const [showWhatsapp, setShowWhatsapp] = useState(false);
+
+  // 🔒 Route Protection
+  useEffect(() => {
+    const unlocked = sessionStorage.getItem("premiumUnlocked");
+    if (!unlocked) {
+      navigate("/payment-success");
+    }
+  }, [navigate]);
 
   const WHATSAPP_NUMBER = "919876543210";
   const MESSAGE =
@@ -17,6 +25,8 @@ export default function Maxx() {
       "_blank"
     );
   };
+
+  // rest of your Maxx code remains exactly same...
 
   const handlePayment = async (amount, plan) => {
     const token = localStorage.getItem("token");

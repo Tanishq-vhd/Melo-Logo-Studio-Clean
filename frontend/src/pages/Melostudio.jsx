@@ -1,8 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Melostudio.css";
 import { FiDownload } from "react-icons/fi";
 
 export default function Melostudio() {
+  const navigate = useNavigate();
+
+  // 🔒 Route Protection
+  useEffect(() => {
+    const unlocked = sessionStorage.getItem("premiumUnlocked");
+    if (!unlocked) {
+      navigate("/payment-success");
+    }
+  }, [navigate]);
+
   const [style, setStyle] = useState("Minimal");
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,41 +60,37 @@ export default function Melostudio() {
     }
   };
 
-  // ✅ Direct Download (User already paid)
   const handleDownload = async (url, index) => {
-  try {
-    const res = await fetch("http://localhost:5000/api/generate/download-image", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl: url }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/generate/download-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrl: url }),
+      });
 
-    if (!res.ok) {
-      throw new Error("Download failed");
+      if (!res.ok) {
+        throw new Error("Download failed");
+      }
+
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `melo-logo-${index + 1}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(blobUrl);
+
+    } catch (error) {
+      console.error("Download error:", error);
+      alert("Download failed");
     }
-
-    const blob = await res.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = `melo-logo-${index + 1}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    window.URL.revokeObjectURL(blobUrl);
-
-  } catch (error) {
-    console.error("Download error:", error);
-    alert("Download failed");
-  }
-};
-
-
-
+  };
 
   return (
     <section className="ai-page">

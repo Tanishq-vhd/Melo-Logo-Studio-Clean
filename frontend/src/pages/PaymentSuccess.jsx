@@ -1,6 +1,14 @@
 import { useNavigate } from "react-router-dom";
+
 export default function PaymentSuccess() {
   const navigate = useNavigate();
+
+  const handleContinue = () => {
+    // Unlock premium routes for this session
+    sessionStorage.setItem("premiumUnlocked", "true");
+
+    navigate("/melostudio");
+  };
 
   return (
     <div style={styles.page}>
@@ -17,7 +25,7 @@ export default function PaymentSuccess() {
 
         <button
           style={styles.button}
-          onClick={() => navigate("/melostudio")}
+          onClick={handleContinue}
         >
           Create my first logo
         </button>
