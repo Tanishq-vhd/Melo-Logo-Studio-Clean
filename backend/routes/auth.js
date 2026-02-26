@@ -1,5 +1,4 @@
 import express from "express";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
@@ -10,7 +9,7 @@ const router = express.Router();
 ===================================== */
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user._id }, 
+    { id: user._id },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
@@ -32,14 +31,12 @@ router.post("/signup", async (req, res) => {
       return res.status(409).json({ message: "Email already registered" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // ✅ Password will be hashed by User model (pre-save hook)
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
-      plan: "free",
-      isPremium: false, // CHANGED: Standardized to isPremium
+      password,
+      isPremium: false,
     });
 
     const token = generateToken(user);
@@ -51,8 +48,7 @@ router.post("/signup", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        isPremium: user.isPremium, // CHANGED: Use isPremium
-        plan: user.plan,
+        isPremium: user.isPremium,
       },
     });
   } catch (err) {
@@ -77,7 +73,8 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    // ✅ Use model method
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -91,8 +88,7 @@ router.post("/login", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        isPremium: user.isPremium, // CHANGED: This pulls the 'true' value for premium users
-        plan: user.plan,
+        isPremium: user.isPremium,
       },
     });
   } catch (err) {
@@ -115,13 +111,12 @@ router.post("/google", async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      const hashedPassword = await bcrypt.hash(googleId, 10);
+      // ✅ googleId stored as password, hashed by model
       user = await User.create({
         name: name || "Google User",
         email,
-        password: hashedPassword,
-        plan: "free",
-        isPremium: false, // CHANGED: Standardized to isPremium
+        password: googleId,
+        isPremium: false,
       });
     }
 
@@ -134,8 +129,7 @@ router.post("/google", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        isPremium: user.isPremium, // CHANGED: Use isPremium
-        plan: user.plan,
+        isPremium: user.isPremium,
       },
     });
   } catch (err) {

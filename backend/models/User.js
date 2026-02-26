@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
     },
 
-    // ✅ Premium fields - Matches your manual Compass update
+    // ✅ Premium fields
     isPremium: {
       type: Boolean,
       default: false,
@@ -39,28 +39,26 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-/* 🔐 Hash password before saving */
-userSchema.pre("save", async function (next) {
-  // Only hash the password if it has been modified (or is new)
-  if (!this.isModified("password")) return next();
+/* 🔐 Hash password before saving (FIXED) */
+userSchema.pre("save", async function () {
+  // Only hash if password is new or modified
+  if (!this.isModified("password")) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
-/* 🔑 Compare password - Renamed to 'comparePassword' to match auth.js */
+/* 🔑 Compare password */
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
 };
 
-/* ✅ Check if premium is still valid */
+/* ✅ Check if premium is active */
 userSchema.methods.isPremiumActive = function () {
   if (!this.isPremium) return false;
 
-  // Auto-expire if the date has passed
   if (this.premiumExpiry && this.premiumExpiry < new Date()) {
-    return false; 
+    return false;
   }
 
   return true;
