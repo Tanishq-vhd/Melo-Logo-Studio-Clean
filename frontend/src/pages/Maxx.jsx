@@ -15,7 +15,7 @@ export default function Maxx() {
     }
   }, [navigate]);
 
-  const WHATSAPP_NUMBER = "919876543210";
+  const WHATSAPP_NUMBER = "919019873827";
   const MESSAGE =
     "Hi 👋 I’m interested in learning more about your premium plans.";
 
