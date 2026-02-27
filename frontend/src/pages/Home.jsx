@@ -21,14 +21,14 @@ const prompts = [
 ];
 
 const logos = [
-  { title: "Beauty Brand", img: beauty, path: "/beauty-brand" },
-  { title: "Fashion Store", img: fashion, path: "/fashion" },
-  { title: "Bakery", img: BakeryImg, path: "/bakery" },
-  { title: "Jewellery", img: JewelleryImg, path: "/jewellery" },
-  { title: "Tech Startup", img: tech, path: "/tech" },
-  { title: "Food Brand", img: food, path: "/food-brand" },
-  { title: "Skincare", img: skincareImg, path: "/skincare" },
-  { title: "Pet Supplies", img: petsupplies, path: "/pet-supplies" }, // Updated from /signup to /pet-supplies
+  { title: "Beauty Brand", img: beauty },
+  { title: "Fashion Store", img: fashion },
+  { title: "Bakery", img: BakeryImg },
+  { title: "Jewellery", img: JewelleryImg },
+  { title: "Tech Startup", img: tech },
+  { title: "Food Brand", img: food },
+  { title: "Skincare", img: skincareImg },
+  { title: "Pet Supplies", img: petsupplies },
 ];
 
 export default function Home() {
@@ -41,6 +41,25 @@ export default function Home() {
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  /* 🔐 Central Navigation Logic */
+  const handleCreateFlow = () => {
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+    const user = userData ? JSON.parse(userData) : null;
+
+    if (!token) {
+      navigate("/signup");
+      return;
+    }
+
+    if (user?.isPaid === true) {
+      navigate("/payment-success");
+      return;
+    }
+
+    navigate("/payment");
+  };
 
   /* Typing animation */
   useEffect(() => {
@@ -72,24 +91,6 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handlePlusClick = () => {
-  const userData = localStorage.getItem("user");
-  const user = userData ? JSON.parse(userData) : null;
-
-  // FIX: Check the isPaid property inside the user object
-  if (user && user.isPaid) {
-    fileInputRef.current.click();
-  } else {
-    navigate("/signup");
-  }
-};
-
-  const handleGenerate = () => {
-    if (inputValue.trim() || placeholder) {
-      navigate("/signup");
-    }
-  };
-
   return (
     <>
       {/* HERO */}
@@ -119,7 +120,7 @@ export default function Home() {
               <button
                 type="button"
                 className="minimal-plus-btn"
-                onClick={handlePlusClick}
+                onClick={handleCreateFlow}
               >
                 +
               </button>
@@ -127,7 +128,7 @@ export default function Home() {
               <button
                 type="button"
                 className="minimal-arrow-btn"
-                onClick={handleGenerate}
+                onClick={handleCreateFlow}
               >
                 ↑
               </button>
@@ -147,13 +148,7 @@ export default function Home() {
             <div
               key={index}
               className="logo-card"
-              onClick={() => {
-                if (item.path) {
-                  navigate(item.path);
-                } else {
-                  navigate("/signup");
-                }
-              }}
+              onClick={handleCreateFlow}
             >
               <img src={item.img} alt={item.title} />
               <p>{item.title}</p>
@@ -174,7 +169,7 @@ export default function Home() {
 
         <button
           className="black-cta"
-          onClick={() => navigate("/signup")}
+          onClick={handleCreateFlow}
         >
           CREATE NOW
         </button>
