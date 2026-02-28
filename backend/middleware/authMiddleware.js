@@ -15,22 +15,31 @@ const authMiddleware = async (req, res, next) => {
 
     let user = await User.findOne({ firebaseUid: decodedToken.uid });
 
-    // 🔥 If user does not exist, create it automatically
     if (!user) {
-      user = await User.create({
-        name: decodedToken.name || "User",
-        email: decodedToken.email,
-        firebaseUid: decodedToken.uid,
-        isPremium: false,
-      });
+      // 🔥 Try find by email
+      user = await User.findOne({ email: decodedToken.email });
+
+      if (user) {
+        // Attach firebase UID to existing user
+        user.firebaseUid = decodedToken.uid;
+        await user.save();
+      } else {
+        // Create new user
+        user = await User.create({
+          name: decodedToken.name || "User",
+          email: decodedToken.email,
+          firebaseUid: decodedToken.uid,
+          isPremium: false,
+        });
+      }
     }
 
     req.user = user;
     next();
 
   } catch (error) {
-    console.error("Auth error:", error.message);
-    return res.status(401).json({ message: "Invalid or expired token" });
+    console.error("Auth error:", error);
+    return res.status(401).json({ message: "Authentication failed" });
   }
 };
 
