@@ -28,7 +28,16 @@ export default function Login() {
       // ✅ success case
       if (res && res.token) {
         localStorage.setItem("token", res.token);
-        navigate("/success");
+
+        // 🚨 THE FIX: Read premium status and unlock the generator route
+        if (res.user && res.user.isPremium) {
+          sessionStorage.setItem("premiumUnlocked", "true");
+        } else {
+          sessionStorage.removeItem("premiumUnlocked");
+        }
+
+        // Navigate to the next page
+        navigate("/success"); 
         return;
       }
 
