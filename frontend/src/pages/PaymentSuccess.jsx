@@ -4,6 +4,15 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
 
   const handleContinue = () => {
+    // 🔥 Fire Purchase event when CTA is clicked
+    if (window.fbq) {
+      window.fbq("track", "Purchase", {
+        value: 299, // 🔁 Replace with dynamic amount if available
+        currency: "INR",
+        content_name: "Create My First Logo CTA"
+      });
+    }
+
     // Unlock premium routes for this session
     sessionStorage.setItem("premiumUnlocked", "true");
 
