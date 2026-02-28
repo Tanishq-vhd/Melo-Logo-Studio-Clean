@@ -160,6 +160,50 @@ app.post("/api/payment/verify-and-upgrade", async (req, res) => {
     });
   }
 });
+/* =========================
+   CHECK PAYMENT STATUS
+========================= */
+
+app.get("/api/payment/check-status/:email", async (req, res) => {
+  try {
+    const email = req.params.email;
+
+    const usersCollection = mongoose.connection.collection("users");
+
+    const user = await usersCollection.findOne({ email });
+
+    if (!user) {
+      return res.json({
+        success: true,
+        isPremium: false,
+      });
+    }
+
+    // Check expiry
+    if (
+      user.isPremium &&
+      user.premiumExpiry &&
+      new Date(user.premiumExpiry) > new Date()
+    ) {
+      return res.json({
+        success: true,
+        isPremium: true,
+      });
+    }
+
+    return res.json({
+      success: true,
+      isPremium: false,
+    });
+
+  } catch (err) {
+    console.error("Status check error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
 
 /* =========================
    HEALTH CHECK
