@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import admin from "../Firebase.js";
 import User from "../models/User.js";
 
 const authMiddleware = async (req, res, next) => {
@@ -11,18 +11,16 @@ const authMiddleware = async (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
-    // 1. Verify the custom JWT created by your auth.js file
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decodedToken = await admin.auth().verifyIdToken(token);
 
-    // 2. Find the exact user using their MongoDB _id
-    const user = await User.findById(decoded.id);
+    // 🔥 Find user by Firebase UID
+    const user = await User.findOne({ firebaseUid: decodedToken.uid });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found in database" });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // 3. Attach the FULL database user object for generate.js to use
-    req.user = user; 
+    req.user = user; // now full Mongo user object
     next();
 
   } catch (error) {

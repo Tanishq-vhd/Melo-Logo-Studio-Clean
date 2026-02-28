@@ -19,17 +19,15 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      // Made optional: If a user signs in with Firebase (like Google Sign-In), 
-      // they won't have a local password, so this prevents validation crashes.
-      required: false, 
+      required: false, // 🔥 Allow Google users without password
       minlength: 6,
     },
 
-    // ✅ ADDED: This is the missing link between Firebase and your database
+    // 🔥 ADD THIS (Very Important)
     firebaseUid: {
       type: String,
+      required: true,
       unique: true,
-      sparse: true, // Allows it to be empty for older users who don't have it yet
     },
 
     // ✅ Premium fields
@@ -48,14 +46,12 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-/* 🔐 Hash password before saving (FIXED) */
-userSchema.pre("save", async function (next) {
-  // Only hash if a password actually exists AND is new or modified
-  if (!this.password || !this.isModified("password")) return next();
+/* 🔐 Hash password before saving */
+userSchema.pre("save", async function () {
+  if (!this.isModified("password") || !this.password) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next(); // Added next() to properly move to the next middleware
 });
 
 /* 🔑 Compare password */
