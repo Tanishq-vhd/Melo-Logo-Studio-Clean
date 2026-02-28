@@ -13,14 +13,19 @@ const authMiddleware = async (req, res, next) => {
 
     const decodedToken = await admin.auth().verifyIdToken(token);
 
-    // 🔥 Find user by Firebase UID
-    const user = await User.findOne({ firebaseUid: decodedToken.uid });
+    let user = await User.findOne({ firebaseUid: decodedToken.uid });
 
+    // 🔥 If user does not exist, create it automatically
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      user = await User.create({
+        name: decodedToken.name || "User",
+        email: decodedToken.email,
+        firebaseUid: decodedToken.uid,
+        isPremium: false,
+      });
     }
 
-    req.user = user; // now full Mongo user object
+    req.user = user;
     next();
 
   } catch (error) {
