@@ -10,36 +10,37 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-
     const decodedToken = await admin.auth().verifyIdToken(token);
 
     let user = await User.findOne({ firebaseUid: decodedToken.uid });
 
+    // 🔥 If not found by firebaseUid, try find by email
     if (!user) {
-      // 🔥 Try find by email
       user = await User.findOne({ email: decodedToken.email });
 
       if (user) {
-        // Attach firebase UID to existing user
+        // Attach firebaseUid to existing user
         user.firebaseUid = decodedToken.uid;
         await user.save();
-      } else {
-        // Create new user
-        user = await User.create({
-          name: decodedToken.name || "User",
-          email: decodedToken.email,
-          firebaseUid: decodedToken.uid,
-          isPremium: false,
-        });
       }
+    }
+
+    // If still no user, create new one
+    if (!user) {
+      user = await User.create({
+        name: decodedToken.name || "User",
+        email: decodedToken.email,
+        firebaseUid: decodedToken.uid,
+        isPremium: false,
+      });
     }
 
     req.user = user;
     next();
 
   } catch (error) {
-    console.error("Auth error:", error);
-    return res.status(401).json({ message: "Authentication failed" });
+    console.error("Auth error:", error.message);
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
 
