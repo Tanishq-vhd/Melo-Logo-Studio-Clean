@@ -33,16 +33,20 @@ const RequireAuth = ({ children }) => {
 
 /* 💎 Payment Wrapper: Checks if user has Paid status */
 const RequirePayment = ({ children }) => {
+  // 1. Check local storage
   const userData = localStorage.getItem("user");
   const user = userData ? JSON.parse(userData) : null;
+  
+  // 2. Check the session storage lock we created in Login.jsx
+  const premiumSession = sessionStorage.getItem("premiumUnlocked");
 
-  // ✅ LOGIC FIX: Check for 'isPaid' to match your MongoDB and server.js update logic
-  // We use strict equality to ensure it's specifically true
-  if (!user || user.isPaid !== true) {
-    return <Navigate to="/payment" replace />;
+  // ✅ LOGIC FIX: Check for 'isPremium' (what your DB uses) OR the premiumSession
+  if ((user && user.isPremium === true) || premiumSession === "true") {
+    return children;
   }
   
-  return children;
+  // If neither is true, back to the paywall
+  return <Navigate to="/payment" replace />;
 };
 
 const Loader = () => (
