@@ -169,7 +169,6 @@ app.get("/api/payment/check-status/:email", async (req, res) => {
     const email = req.params.email;
 
     const usersCollection = mongoose.connection.collection("users");
-
     const user = await usersCollection.findOne({ email });
 
     if (!user) {
@@ -179,21 +178,10 @@ app.get("/api/payment/check-status/:email", async (req, res) => {
       });
     }
 
-    // Check expiry
-    if (
-      user.isPremium &&
-      user.premiumExpiry &&
-      new Date(user.premiumExpiry) > new Date()
-    ) {
-      return res.json({
-        success: true,
-        isPremium: true,
-      });
-    }
-
+    // 🔥 ONLY CHECK isPremium
     return res.json({
       success: true,
-      isPremium: false,
+      isPremium: user.isPremium === true,
     });
 
   } catch (err) {
