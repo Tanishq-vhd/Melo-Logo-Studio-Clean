@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Melostudio.css";
 import { FiDownload } from "react-icons/fi";
@@ -7,12 +7,14 @@ export default function Melostudio() {
   const navigate = useNavigate();
 
   // 🔒 Route Protection
+  /*
   useEffect(() => {
     const unlocked = sessionStorage.getItem("premiumUnlocked");
     if (!unlocked) {
       navigate("/payment-success");
     }
   }, [navigate]);
+  */
 
   const [style, setStyle] = useState("Minimal");
   const [prompt, setPrompt] = useState("");
