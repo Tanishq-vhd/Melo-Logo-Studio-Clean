@@ -20,12 +20,15 @@ export default function Melostudio() {
   const [images, setImages] = useState([]);
   const [error, setError] = useState("");
 
-  // 🔥 Use Production Backend
-  const API_BASE = "https://melo-logo-studio.onrender.com";
-
   const generateLogo = async () => {
     if (!prompt.trim()) {
       setError("Please describe your logo");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/signin");
       return;
     }
 
@@ -36,19 +39,23 @@ export default function Melostudio() {
     try {
       const finalPrompt = `${style} style logo. ${prompt}`;
 
-      const res = await fetch(`${API_BASE}/api/generate/image`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt: finalPrompt }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Server error");
-      }
+      const res = await fetch(
+        "https://melo-logo-studio.onrender.com/api/generate/image",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ prompt: finalPrompt }),
+        }
+      );
 
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Server error");
+      }
 
       if (!data.images || data.images.length === 0) {
         throw new Error("No images returned");
@@ -64,14 +71,24 @@ export default function Melostudio() {
   };
 
   const handleDownload = async (url, index) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_BASE}/api/generate/download-image`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ imageUrl: url }),
-      });
+      const res = await fetch(
+        "https://melo-logo-studio.onrender.com/api/generate/download-image",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ imageUrl: url }),
+        }
+      );
 
       if (!res.ok) {
         throw new Error("Download failed");
@@ -146,7 +163,6 @@ export default function Melostudio() {
             {images.map((img, index) => (
               <div key={index} className="logo-tile">
                 <img src={img} alt={`Logo ${index + 1}`} />
-
                 <button
                   className="download-btn"
                   onClick={() => handleDownload(img, index)}
