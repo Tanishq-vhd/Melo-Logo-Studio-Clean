@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Melostudio.css";
 import { FiDownload } from "react-icons/fi";
-import { auth } from "../firebase";
 
 export default function Melostudio() {
   const navigate = useNavigate();
@@ -27,9 +26,9 @@ export default function Melostudio() {
       return;
     }
 
-    // --- UPDATED: Get current user from Firebase ---
-    const user = auth.currentUser;
-    if (!user) {
+    // ✅ Grab your custom token from localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
       navigate("/signin");
       return;
     }
@@ -39,9 +38,6 @@ export default function Melostudio() {
     setImages([]);
 
     try {
-      // --- UPDATED: Fetch a fresh, unexpired token ---
-      const token = await user.getIdToken(true);
-
       const finalPrompt = `${style} style logo. ${prompt}`;
 
       const res = await fetch(
@@ -50,7 +46,7 @@ export default function Melostudio() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Using fresh token
+            Authorization: `Bearer ${token}`, // Send the custom token
           },
           body: JSON.stringify({ prompt: finalPrompt }),
         }
@@ -76,24 +72,20 @@ export default function Melostudio() {
   };
 
   const handleDownload = async (url, index) => {
-    // --- UPDATED: Get current user from Firebase ---
-    const user = auth.currentUser;
-    if (!user) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       navigate("/signin");
       return;
     }
 
     try {
-      // --- UPDATED: Fetch a fresh, unexpired token ---
-      const token = await user.getIdToken(true);
-
       const res = await fetch(
         "https://melo-logo-studio.onrender.com/api/generate/download-image",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Using fresh token
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ imageUrl: url }),
         }
