@@ -20,6 +20,9 @@ export default function Melostudio() {
   const [images, setImages] = useState([]);
   const [error, setError] = useState("");
 
+  // 🔥 Use Production Backend
+  const API_BASE = "https://melo-logo-studio.onrender.com";
+
   const generateLogo = async () => {
     if (!prompt.trim()) {
       setError("Please describe your logo");
@@ -33,7 +36,7 @@ export default function Melostudio() {
     try {
       const finalPrompt = `${style} style logo. ${prompt}`;
 
-      const res = await fetch("http://localhost:5000/api/generate/image", {
+      const res = await fetch(`${API_BASE}/api/generate/image`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +65,7 @@ export default function Melostudio() {
 
   const handleDownload = async (url, index) => {
     try {
-      const res = await fetch("http://localhost:5000/api/generate/download-image", {
+      const res = await fetch(`${API_BASE}/api/generate/download-image`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,7 +88,6 @@ export default function Melostudio() {
       document.body.removeChild(link);
 
       window.URL.revokeObjectURL(blobUrl);
-
     } catch (error) {
       console.error("Download error:", error);
       alert("Download failed");
