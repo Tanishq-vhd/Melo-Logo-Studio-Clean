@@ -1,6 +1,6 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { Navigate, Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { auth } from "../firebase";
 
 const ProtectedRoute = () => {
   const [loading, setLoading] = useState(true);
@@ -8,17 +8,27 @@ const ProtectedRoute = () => {
 
   useEffect(() => {
     const checkPremiumStatus = async () => {
+      const user = auth.currentUser;
+
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        // This calls the /api/profile route we discussed earlier
-        const token = localStorage.getItem("token");
-        const response = await axios.get("https://melo-logo-studio.onrender.com/api/profile", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        // Use the status from your MongoDB
-        setIsPremium(response.data.isPremium);
+        const res = await fetch(
+          `https://melo-logo-studio.onrender.com/api/payment/check-status/${user.email}`
+        );
+
+        const data = await res.json();
+
+        if (data.success && data.isPremium) {
+          setIsPremium(true);
+        } else {
+          setIsPremium(false);
+        }
       } catch (error) {
-        console.error("Auth check failed", error);
+        console.error("Premium check failed", error);
         setIsPremium(false);
       } finally {
         setLoading(false);
@@ -30,7 +40,6 @@ const ProtectedRoute = () => {
 
   if (loading) return <div>Loading...</div>;
 
-  // If premium, show the page (Outlet); if not, send to payment
   return isPremium ? <Outlet /> : <Navigate to="/payment" />;
 };
 
