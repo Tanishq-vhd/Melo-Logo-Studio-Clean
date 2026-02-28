@@ -1,10 +1,10 @@
 import "./firebase";
 import React, { Suspense, lazy, useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
 import { auth } from "./firebase";
+import Navbar from "./components/Navbar";
 
-// Lazy loaded pages
+/* ================= Lazy Pages ================= */
 const Home = lazy(() => import("./pages/Home"));
 const Melostudio = lazy(() => import("./pages/Melostudio"));
 const Maxx = lazy(() => import("./pages/Maxx"));
@@ -25,9 +25,7 @@ const Skincare = lazy(() => import("./pages/Skincare"));
 const Tech = lazy(() => import("./pages/Tech"));
 const PetSupplies = lazy(() => import("./pages/PetSupplies"));
 
-/* =========================
-   AUTH PROTECTION
-========================= */
+/* ================= AUTH PROTECTION ================= */
 const RequireAuth = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
@@ -46,17 +44,13 @@ const RequireAuth = ({ children }) => {
   return authenticated ? children : <Navigate to="/signin" replace />;
 };
 
-/* =========================
-   PREMIUM PROTECTION
-========================= */
+/* ================= PREMIUM PROTECTION ================= */
 const RequirePayment = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
-    const checkPremium = async () => {
-      const user = auth.currentUser;
-
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
         setLoading(false);
         return;
@@ -74,15 +68,15 @@ const RequirePayment = ({ children }) => {
         } else {
           setIsPremium(false);
         }
-      } catch (error) {
-        console.error("Premium check failed", error);
+      } catch (err) {
+        console.error("Premium check failed", err);
         setIsPremium(false);
       } finally {
         setLoading(false);
       }
-    };
+    });
 
-    checkPremium();
+    return () => unsubscribe();
   }, []);
 
   if (loading) return <div style={{ padding: 40 }}>Checking subscription...</div>;
@@ -90,15 +84,14 @@ const RequirePayment = ({ children }) => {
   return isPremium ? children : <Navigate to="/payment" replace />;
 };
 
+/* ================= LOADER ================= */
 const Loader = () => (
-  <div style={{ padding: "100px", textAlign: "center", fontSize: "1.2rem", color: "#ff4d94" }}>
+  <div style={{ padding: 100, textAlign: "center", color: "#ff4d94" }}>
     Loading Component...
   </div>
 );
 
-/* =========================
-   MAIN APP
-========================= */
+/* ================= MAIN APP ================= */
 function App() {
   return (
     <>
@@ -106,7 +99,7 @@ function App() {
       <Suspense fallback={<Loader />}>
         <Routes>
 
-          {/* 🌍 Public Routes */}
+          {/* Public */}
           <Route path="/" element={<Home />} />
           <Route path="/beauty-brand" element={<BeautyBrand />} />
           <Route path="/fashion" element={<Fashion />} />
@@ -120,11 +113,11 @@ function App() {
           <Route path="/terms-of-use" element={<TermsOfUse />} />
           <Route path="/about" element={<AboutUs />} />
 
-          {/* 🔓 Auth Routes */}
+          {/* Auth */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
 
-          {/* 💳 Payment */}
+          {/* Payment */}
           <Route
             path="/payment"
             element={
@@ -143,7 +136,7 @@ function App() {
             }
           />
 
-          {/* 🚀 Premium Routes */}
+          {/* Premium */}
           <Route
             path="/melostudio"
             element={
@@ -177,7 +170,7 @@ function App() {
             }
           />
 
-          {/* 🔁 Fallback */}
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
