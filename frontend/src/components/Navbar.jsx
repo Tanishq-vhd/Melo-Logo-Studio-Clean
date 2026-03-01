@@ -1,29 +1,33 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { auth } from "../firebase";
 import "./Navbar.css";
 import logo from "../assets/images/logo.jpg";
- 
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const [user, setUser] = useState(null);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("isPaid");
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+      setUser(firebaseUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await auth.signOut();
     navigate("/signin");
   };
 
   return (
     <header className="navbar">
       <div className="navbar-container">
-        
-        {/* 🔥 BRAND LOGO + NAME */}
+
+        {/* Logo */}
         <Link to="/" className="logo">
-          <img
-            src={logo}
-            alt="melo"
-            className="brand-logo"
-          />
+          <img src={logo} alt="melo" className="brand-logo" />
           <span className="brand-name">melo</span>
         </Link>
 
@@ -34,7 +38,7 @@ export default function Navbar() {
         </nav>
 
         <div className="auth-buttons">
-          {!token ? (
+          {!user ? (
             <>
               <Link to="/signin" className="signin">Sign In</Link>
               <Link to="/signup" className="signup">Sign Up</Link>
@@ -49,6 +53,7 @@ export default function Navbar() {
             </button>
           )}
         </div>
+
       </div>
     </header>
   );
