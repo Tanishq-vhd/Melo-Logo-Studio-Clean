@@ -10,9 +10,7 @@ export default function Payment() {
     process.env.REACT_APP_API_URL || "https://melo-logo-studio.onrender.com";
 
   useEffect(() => {
-    const checkPremium = async () => {
-      const user = auth.currentUser;
-
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
         navigate("/signin");
         return;
@@ -33,20 +31,18 @@ export default function Payment() {
         const data = await res.json();
 
         if (data.success && data.isPremium) {
-          // Already premium
           navigate("/success");
         } else {
-          // Not premium → show payment page
-          setLoading(false);
+          setLoading(false); // Show payment UI
         }
 
       } catch (err) {
         console.error("Status check failed:", err);
         setLoading(false);
       }
-    };
+    });
 
-    checkPremium();
+    return () => unsubscribe();
   }, [navigate, API_URL]);
 
   if (loading) {
@@ -62,7 +58,6 @@ export default function Payment() {
       <h2>Premium Plan - ₹299</h2>
       <p>Unlock unlimited logo generation.</p>
 
-      {/* Add Razorpay button here */}
       <button
         style={{
           padding: "12px 24px",
@@ -74,8 +69,7 @@ export default function Payment() {
           fontSize: "16px",
         }}
         onClick={() => {
-          // Trigger Razorpay flow here
-          console.log("Start Razorpay Payment");
+          console.log("Trigger Razorpay here");
         }}
       >
         Pay ₹299
