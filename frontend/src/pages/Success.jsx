@@ -1,51 +1,7 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfile } from "../services/api";
 
 export default function Success() {
   const navigate = useNavigate();
-  const [redirecting, setRedirecting] = useState(false);
-
-  useEffect(() => {
-    let timer;
-
-    const verifyAccess = async () => {
-      try {
-        const res = await getProfile();
-
-        // ❌ Invalid session
-        if (
-          res?.message === "Invalid or expired token" ||
-          res?.message === "No token provided"
-        ) {
-          navigate("/signin");
-          return;
-        }
-
-        // ❌ Payment not completed
-        const isPaid = localStorage.getItem("isPaid");
-        if (isPaid !== "true") {
-          navigate("/payment");
-          return;
-        }
-
-        // ✅ Start redirect animation
-        setRedirecting(true);
-
-        timer = setTimeout(() => {
-          navigate("/melostudio");
-        }, 2000);
-      } catch (error) {
-        navigate("/signin");
-      }
-    };
-
-    verifyAccess();
-
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [navigate]);
 
   return (
     <div
@@ -67,7 +23,6 @@ export default function Success() {
           boxShadow: "0 30px 80px rgba(0,0,0,0.08)",
         }}
       >
-        {/* Green Check */}
         <div
           style={{
             width: "60px",
@@ -86,7 +41,6 @@ export default function Success() {
           ✓
         </div>
 
-        {/* Title */}
         <h1
           style={{
             marginTop: "28px",
@@ -101,10 +55,8 @@ export default function Success() {
           activated
         </h1>
 
-        {/* Emoji */}
         <div style={{ fontSize: "28px", marginTop: "12px" }}>🎉</div>
 
-        {/* Description */}
         <p
           style={{
             marginTop: "20px",
@@ -116,37 +68,6 @@ export default function Success() {
           Your payment was successful. You can now create unlimited logos.
         </p>
 
-        {/* Redirect Text */}
-        {redirecting && (
-          <p
-            style={{
-              marginTop: "16px",
-              fontSize: "14px",
-              color: "#9ca3af",
-            }}
-          >
-            Redirecting to MeloStudio...
-          </p>
-        )}
-
-        {/* Spinner */}
-        {redirecting && (
-          <div
-            style={{
-              marginTop: "10px",
-              width: "24px",
-              height: "24px",
-              border: "3px solid #ec4899",
-              borderTop: "3px solid transparent",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          />
-        )}
-
-        {/* Button */}
         <button
           onClick={() => navigate("/melostudio")}
           style={{
@@ -163,15 +84,6 @@ export default function Success() {
         >
           Create my first logo
         </button>
-
-        {/* Spinner Animation */}
-        <style>
-          {`
-            @keyframes spin {
-              to { transform: rotate(360deg); }
-            }
-          `}
-        </style>
       </div>
     </div>
   );
