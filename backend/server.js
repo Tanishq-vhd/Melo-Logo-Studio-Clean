@@ -8,6 +8,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import crypto from "crypto";
+import { auth } from "../firebase";
 
 import authRoutes from "./routes/auth.js";
 import protectedRoutes from "./routes/protected.js";

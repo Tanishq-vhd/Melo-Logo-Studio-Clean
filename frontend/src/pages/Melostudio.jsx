@@ -1,20 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase";
 import "./Melostudio.css";
 import { FiDownload } from "react-icons/fi";
 
 export default function Melostudio() {
   const navigate = useNavigate();
-
-  // 🔒 Route Protection
-  /*
-  useEffect(() => {
-    const unlocked = sessionStorage.getItem("premiumUnlocked");
-    if (!unlocked) {
-      navigate("/payment-success");
-    }
-  }, [navigate]);
-  */
 
   const [style, setStyle] = useState("Minimal");
   const [prompt, setPrompt] = useState("");
@@ -28,12 +19,13 @@ export default function Melostudio() {
       return;
     }
 
-    // ✅ Grab your custom token from localStorage
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const user = auth.currentUser;
+    if (!user) {
       navigate("/signin");
       return;
     }
+
+    const token = await user.getIdToken(true);
 
     setError("");
     setLoading(true);
@@ -48,7 +40,7 @@ export default function Melostudio() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Send the custom token
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ prompt: finalPrompt }),
         }
@@ -74,11 +66,13 @@ export default function Melostudio() {
   };
 
   const handleDownload = async (url, index) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const user = auth.currentUser;
+    if (!user) {
       navigate("/signin");
       return;
     }
+
+    const token = await user.getIdToken(true);
 
     try {
       const res = await fetch(
