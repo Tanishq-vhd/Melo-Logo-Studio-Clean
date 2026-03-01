@@ -1,19 +1,15 @@
 import "./Maxx.css";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadRazorpay } from "../services/razorpay";
+import { auth } from "../firebase";
 
 export default function Maxx() {
   const navigate = useNavigate();
   const [showWhatsapp, setShowWhatsapp] = useState(false);
 
   // 🔒 Route Protection
-  useEffect(() => {
-    const unlocked = sessionStorage.getItem("premiumUnlocked");
-    if (!unlocked) {
-      navigate("/payment-success");
-    }
-  }, [navigate]);
+  
 
   const WHATSAPP_NUMBER = "919019873827";
   const MESSAGE =
@@ -29,11 +25,42 @@ export default function Maxx() {
   // rest of your Maxx code remains exactly same...
 
   const handlePayment = async (amount, plan) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/signin");
-      return;
+    const handlePayment = async (amount, plan) => {
+  const user = auth.currentUser;
+
+  if (!user) {
+    navigate("/signin");
+    return;
+  }
+
+  const token = await user.getIdToken(true);
+
+  await loadRazorpay();
+
+  const res = await fetch(
+    "https://melo-logo-studio.onrender.com/api/payment/create-order",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     }
+  );
+
+  const order = await res.json();
+
+  new window.Razorpay({
+    key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+    amount: order.amount,
+    currency: "INR",
+    name: "Melo Studio",
+    description: plan,
+    order_id: order.id,
+    handler: () => navigate("/success"),
+    theme: { color: "#ff4da6" },
+  }).open();
+};
 
     await loadRazorpay();
 
