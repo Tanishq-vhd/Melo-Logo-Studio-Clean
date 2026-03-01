@@ -25,14 +25,14 @@ export default function SignUp() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ================= EMAIL SIGNUP =================
+  /* ================= EMAIL SIGNUP ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      // 1️⃣ Create user in Firebase
+      // 1️⃣ Create Firebase user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         form.email,
@@ -41,7 +41,7 @@ export default function SignUp() {
 
       const firebaseUser = userCredential.user;
 
-      // 2️⃣ Send user data + firebaseUid to backend
+      // 2️⃣ Send to backend
       const res = await signupUser({
         name: form.name,
         email: form.email,
@@ -50,19 +50,22 @@ export default function SignUp() {
       });
 
       if (res?.token) {
+        // Save token
         localStorage.setItem("token", res.token);
 
-        const userData = {
-          email: res.user?.email || form.email,
-          isPaid: false,
-        };
+        // Save full backend user (contains isPremium)
+        localStorage.setItem("user", JSON.stringify(res.user));
 
-        localStorage.setItem("user", JSON.stringify(userData));
-
-        navigate("/payment");
+        // Redirect properly
+        if (res.user.isPremium) {
+          navigate("/success");
+        } else {
+          navigate("/payment");
+        }
       } else {
         setError(res?.message || "Signup failed");
       }
+
     } catch (err) {
       console.error("Signup error:", err);
       setError(err?.response?.data?.message || err.message || "Signup failed");
@@ -71,7 +74,7 @@ export default function SignUp() {
     setLoading(false);
   };
 
-  // ================= GOOGLE SIGNUP =================
+  /* ================= GOOGLE SIGNUP ================= */
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError("");
@@ -79,30 +82,28 @@ export default function SignUp() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-
       const user = result.user;
 
       const res = await signupUser({
         name: user.displayName || "Google User",
         email: user.email,
-        password: user.uid, // simple backend requirement
+        password: user.uid,
         firebaseUid: user.uid,
       });
 
       if (res?.token) {
         localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res.user));
 
-        const userData = {
-          email: user.email,
-          isPaid: false,
-        };
-
-        localStorage.setItem("user", JSON.stringify(userData));
-
-        navigate("/payment");
+        if (res.user.isPremium) {
+          navigate("/success");
+        } else {
+          navigate("/payment");
+        }
       } else {
         setError(res?.message || "Google signup failed");
       }
+
     } catch (error) {
       console.error("Google sign-in error:", error);
       setError(error?.response?.data?.message || error.message || "Google sign-in failed");
@@ -118,7 +119,6 @@ export default function SignUp() {
 
         <h1>Create account</h1>
 
-        {/* GOOGLE BUTTON */}
         <button
           type="button"
           className="google-btn"
@@ -136,7 +136,6 @@ export default function SignUp() {
           <span>or</span>
         </div>
 
-        {/* EMAIL SIGNUP */}
         <form className="auth-form" onSubmit={handleSubmit}>
           <input
             type="text"

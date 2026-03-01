@@ -32,7 +32,7 @@ router.post("/create-order", authMiddleware, async (req, res) => {
     const rzp = getRazorpay();
 
     const order = await rzp.orders.create({
-      amount: 299, // ₹299
+      amount: 29900, // ₹299 (Razorpay expects paise)
       currency: "INR",
       receipt: `receipt_${user._id}`,
       notes: { userId: user._id.toString() },
@@ -90,6 +90,7 @@ router.post("/verify-payment", authMiddleware, async (req, res) => {
     return res.json({
       success: true,
       message: "Premium activated successfully",
+      isPremium: true,
     });
 
   } catch (error) {
@@ -97,6 +98,37 @@ router.post("/verify-payment", authMiddleware, async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Verification failed",
+    });
+  }
+});
+
+/* ================= CHECK PREMIUM STATUS ================= */
+router.get("/check-status", authMiddleware, async (req, res) => {
+  try {
+    const user = req.user;
+
+    // 🔄 Auto-expire subscription if needed
+    if (
+      user.isPremium &&
+      user.premiumExpiry &&
+      new Date(user.premiumExpiry) < new Date()
+    ) {
+      user.isPremium = false;
+      user.premiumExpiry = null;
+      await user.save();
+    }
+
+    return res.json({
+      success: true,
+      isPremium: user.isPremium,
+      premiumExpiry: user.premiumExpiry,
+    });
+
+  } catch (error) {
+    console.error("Check Status Error:", error);
+    return res.status(500).json({
+      success: false,
+      isPremium: false,
     });
   }
 });
