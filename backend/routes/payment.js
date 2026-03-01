@@ -32,7 +32,7 @@ router.post("/create-order", authMiddleware, async (req, res) => {
     const rzp = getRazorpay();
 
     const order = await rzp.orders.create({
-      amount: 100, // ₹299 (Razorpay expects paise)
+      amount: 29900, // ₹299 (Razorpay expects paise)
       currency: "INR",
       receipt: `receipt_${user._id}`,
       notes: { userId: user._id.toString() },
