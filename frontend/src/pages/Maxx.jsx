@@ -8,9 +8,6 @@ export default function Maxx() {
   const navigate = useNavigate();
   const [showWhatsapp, setShowWhatsapp] = useState(false);
 
-  // 🔒 Route Protection
-  
-
   const WHATSAPP_NUMBER = "919019873827";
   const MESSAGE =
     "Hi 👋 I’m interested in learning more about your premium plans.";
@@ -22,69 +19,53 @@ export default function Maxx() {
     );
   };
 
-  // rest of your Maxx code remains exactly same...
-
+  /* ================= PAYMENT ================= */
   const handlePayment = async (amount, plan) => {
-    const handlePayment = async (amount, plan) => {
-  const user = auth.currentUser;
+    try {
+      const user = auth.currentUser;
 
-  if (!user) {
-    navigate("/signin");
-    return;
-  }
+      if (!user) {
+        navigate("/signin");
+        return;
+      }
 
-  const token = await user.getIdToken(true);
+      const token = await user.getIdToken(true);
 
-  await loadRazorpay();
+      await loadRazorpay();
 
-  const res = await fetch(
-    "https://melo-logo-studio.onrender.com/api/payment/create-order",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      const res = await fetch(
+        "https://melo-logo-studio.onrender.com/api/payment/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const order = await res.json();
+
+      if (!order.id) {
+        alert("Order creation failed");
+        return;
+      }
+
+      new window.Razorpay({
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: "INR",
+        name: "Melo Studio",
+        description: plan,
+        order_id: order.id,
+        handler: () => navigate("/success"),
+        theme: { color: "#ff4da6" },
+      }).open();
+
+    } catch (err) {
+      console.error("Payment error:", err);
+      alert("Payment failed");
     }
-  );
-
-  const order = await res.json();
-
-  new window.Razorpay({
-    key: process.env.REACT_APP_RAZORPAY_KEY_ID,
-    amount: order.amount,
-    currency: "INR",
-    name: "Melo Studio",
-    description: plan,
-    order_id: order.id,
-    handler: () => navigate("/success"),
-    theme: { color: "#ff4da6" },
-  }).open();
-};
-
-    await loadRazorpay();
-
-    const res = await fetch("http://localhost:5000/api/payment/create-order", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ amount }),
-    });
-
-    const order = await res.json();
-
-    new window.Razorpay({
-      key: "rzp_test_xxxxx",
-      amount: order.amount,
-      currency: "INR",
-      name: "Insta Logo Studio",
-      description: plan,
-      order_id: order.id,
-      handler: () => navigate("/success"),
-      theme: { color: "#ff4da6" },
-    }).open();
   };
 
   return (
@@ -117,7 +98,6 @@ export default function Maxx() {
               "Post & story templates",
             ]}
             onPay={() => handlePayment(6999, "Instagram Selling Starter")}
-            
           />
 
           <PriceCard
@@ -131,7 +111,6 @@ export default function Maxx() {
               "Brand usage guidance",
             ]}
             onPay={() => handlePayment(14999, "Instagram Sales Launch")}
-            
           />
         </div>
       </section>
@@ -175,7 +154,7 @@ export default function Maxx() {
   );
 }
 
-function PriceCard({ title, price, items, onPay, onChat, popular }) {
+function PriceCard({ title, price, items, onPay, popular }) {
   return (
     <div className={`price-card ${popular ? "popular" : ""}`}>
       {popular && <span className="badge">Most Popular</span>}
@@ -192,13 +171,6 @@ function PriceCard({ title, price, items, onPay, onChat, popular }) {
       <button className="primary-btn" onClick={onPay}>
         Continue with Premium
       </button>
-
-      {onChat && (
-        <button className="whatsapp-btn" onClick={onChat}>
-          <img src="/whatsapp.svg" alt="" />
-          Chat with us
-        </button>
-      )}
     </div>
   );
 }
