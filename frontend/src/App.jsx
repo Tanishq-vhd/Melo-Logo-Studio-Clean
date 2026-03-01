@@ -186,7 +186,7 @@ function App() {
           />
 
           {/* Fallback */}
-          <Route path="*" element={<div style={{ padding: 40 }}>Page Not Found</div>} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Suspense>
     </>
