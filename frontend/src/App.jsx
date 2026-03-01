@@ -39,7 +39,9 @@ const RequireAuth = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  if (loading) return <div style={{ padding: 40 }}>Checking authentication...</div>;
+  if (loading) {
+    return <div style={{ padding: 40 }}>Checking authentication...</div>;
+  }
 
   return authenticated ? children : <Navigate to="/signin" replace />;
 };
@@ -50,36 +52,48 @@ const RequirePayment = ({ children }) => {
   const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
+    const checkPremium = async () => {
       try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setIsPremium(false);
+          setLoading(false);
+          return;
+        }
+
         const res = await fetch(
-          `https://melo-logo-studio.onrender.com/api/payment/check-status/${user.email}`
+          "https://melo-logo-studio.onrender.com/api/payment/check-status",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         const data = await res.json();
 
-        if (data.success && data.isPremium) {
+        if (data.success && data.isPremium === true) {
           setIsPremium(true);
         } else {
           setIsPremium(false);
         }
+
       } catch (err) {
         console.error("Premium check failed", err);
         setIsPremium(false);
       } finally {
         setLoading(false);
       }
-    });
+    };
 
-    return () => unsubscribe();
+    checkPremium();
   }, []);
 
-  if (loading) return <div style={{ padding: 40 }}>Checking subscription...</div>;
+  if (loading) {
+    return <div style={{ padding: 40 }}>Checking subscription...</div>;
+  }
 
   return isPremium ? children : <Navigate to="/payment" replace />;
 };
@@ -136,7 +150,7 @@ function App() {
             }
           />
 
-          {/* Premium */}
+          {/* Premium Protected */}
           <Route
             path="/melostudio"
             element={
