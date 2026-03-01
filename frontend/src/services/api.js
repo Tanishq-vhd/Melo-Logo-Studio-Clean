@@ -1,3 +1,5 @@
+import { auth } from "../firebase";
+
 const API_BASE = process.env.REACT_APP_API_URL;
 
 if (!API_BASE) {
@@ -6,13 +8,9 @@ if (!API_BASE) {
 
 const API_URL = `${API_BASE}/api`;
 
-// ✅ SAFE response handler with Auth Check
+/* ================= SAFE JSON ================= */
 const safeJson = async (res) => {
-  // If the server says 401, the token is expired (the error you saw)
   if (res.status === 401) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    // Only redirect if we aren't already on the signin page
     if (!window.location.pathname.includes("/signin")) {
       window.location.href = "/signin";
     }
@@ -26,7 +24,19 @@ const safeJson = async (res) => {
   }
 };
 
-// ================== SIGNUP ==================
+/* ================= GET FIREBASE TOKEN ================= */
+const getAuthHeader = async () => {
+  const user = auth.currentUser;
+  if (!user) return {};
+
+  const token = await user.getIdToken(true);
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
+
+/* ================= SIGNUP ================= */
 export const signupUser = async (data) => {
   try {
     const res = await fetch(`${API_URL}/auth/signup`, {
@@ -40,7 +50,7 @@ export const signupUser = async (data) => {
   }
 };
 
-// ================== LOGIN ==================
+/* ================= LOGIN ================= */
 export const loginUser = async (data) => {
   try {
     const res = await fetch(`${API_URL}/auth/login`, {
@@ -54,29 +64,16 @@ export const loginUser = async (data) => {
   }
 };
 
-// ================== PROFILE (Syncs isPremium) ==================
+/* ================= PROFILE ================= */
 export const getProfile = async () => {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    return { message: "Not authenticated" };
-  }
-
   try {
+    const headers = await getAuthHeader();
+
     const res = await fetch(`${API_URL}/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
     });
 
-    const data = await safeJson(res);
-
-    // ✅ SYNC: If profile returns fresh isPremium status, update localStorage
-    if (data && data.user) {
-      localStorage.setItem("user", JSON.stringify(data.user));
-    }
-
-    return data;
+    return await safeJson(res);
   } catch {
     return { message: "Network error. Please try again." };
   }
