@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      sparse: true, // Allows multiple nulls for non-Google users
     },
 
     // ✅ Premium fields
