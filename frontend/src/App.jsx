@@ -60,16 +60,24 @@ const RequirePayment = ({ children }) => {
       }
 
       try {
-        const firebaseToken = await user.getIdToken();
+        // 🔥 Always get fresh Firebase token
+        const freshToken = await user.getIdToken(true);
 
         const res = await fetch(
           "https://melo-logo-studio.onrender.com/api/payment/check-status",
           {
+            method: "GET",
             headers: {
-              Authorization: `Bearer ${firebaseToken}`,
+              Authorization: `Bearer ${freshToken}`,
             },
           }
         );
+
+        if (res.status === 401) {
+          setIsPremium(false);
+          setLoading(false);
+          return;
+        }
 
         const data = await res.json();
 
@@ -80,7 +88,7 @@ const RequirePayment = ({ children }) => {
         }
 
       } catch (err) {
-        console.error("Premium check failed", err);
+        console.error("Premium check failed:", err);
         setIsPremium(false);
       } finally {
         setLoading(false);
@@ -134,7 +142,7 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
 
-          {/* Payment */}
+          {/* Payment (auth required only) */}
           <Route
             path="/payment"
             element={
