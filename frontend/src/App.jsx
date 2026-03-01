@@ -178,9 +178,9 @@ function App() {
             path="/maxx"
             element={
               <RequireAuth>
-                <RequirePayment>
+                
                   <Maxx />
-                </RequirePayment>
+                
               </RequireAuth>
             }
           />
