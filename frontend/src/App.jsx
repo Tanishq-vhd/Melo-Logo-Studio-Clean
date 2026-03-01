@@ -11,7 +11,6 @@ const Maxx = lazy(() => import("./pages/Maxx"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const Payment = lazy(() => import("./pages/Payment"));
-const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const Success = lazy(() => import("./pages/Success"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const TermsOfUse = lazy(() => import("./pages/TermsOfUse"));
@@ -27,23 +26,25 @@ const PetSupplies = lazy(() => import("./pages/PetSupplies"));
 
 /* ================= AUTH PROTECTION ================= */
 const RequireAuth = ({ children }) => {
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
+  const [user, setUser] = useState(undefined);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setAuthenticated(!!user);
-      setLoading(false);
+    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+      setUser(firebaseUser || null);
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
+  if (user === undefined) {
     return <div style={{ padding: 40 }}>Checking authentication...</div>;
   }
 
-  return authenticated ? children : <Navigate to="/signin" replace />;
+  if (!user) {
+    return <Navigate to="/signin" replace />;
+  }
+
+  return children;
 };
 
 /* ================= PREMIUM PROTECTION ================= */
@@ -52,22 +53,20 @@ const RequirePayment = ({ children }) => {
   const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
-    const checkPremium = async () => {
-      try {
-        const token = localStorage.getItem("token");
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-        if (!token) {
-          setIsPremium(false);
-          setLoading(false);
-          return;
-        }
+      try {
+        const firebaseToken = await user.getIdToken();
 
         const res = await fetch(
           "https://melo-logo-studio.onrender.com/api/payment/check-status",
           {
-            method: "GET",
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${firebaseToken}`,
             },
           }
         );
@@ -86,16 +85,20 @@ const RequirePayment = ({ children }) => {
       } finally {
         setLoading(false);
       }
-    };
+    });
 
-    checkPremium();
+    return () => unsubscribe();
   }, []);
 
   if (loading) {
     return <div style={{ padding: 40 }}>Checking subscription...</div>;
   }
 
-  return isPremium ? children : <Navigate to="/payment" replace />;
+  if (!isPremium) {
+    return <Navigate to="/payment" replace />;
+  }
+
+  return children;
 };
 
 /* ================= LOADER ================= */
@@ -141,11 +144,12 @@ function App() {
             }
           />
 
+          {/* Success (NOT premium protected) */}
           <Route
-            path="/payment-success"
+            path="/success"
             element={
               <RequireAuth>
-                <PaymentSuccess />
+                <Success />
               </RequireAuth>
             }
           />
@@ -168,17 +172,6 @@ function App() {
               <RequireAuth>
                 <RequirePayment>
                   <Maxx />
-                </RequirePayment>
-              </RequireAuth>
-            }
-          />
-
-          <Route
-            path="/success"
-            element={
-              <RequireAuth>
-                <RequirePayment>
-                  <Success />
                 </RequirePayment>
               </RequireAuth>
             }
