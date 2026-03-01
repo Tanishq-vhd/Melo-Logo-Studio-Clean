@@ -18,13 +18,13 @@ export default function Payment() {
       }
 
       try {
-        const token = localStorage.getItem("token");
+        const firebaseToken = await user.getIdToken();
 
         const res = await fetch(
           `${API_URL}/api/payment/check-status`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${firebaseToken}`,
             },
           }
         );
@@ -49,15 +49,22 @@ export default function Payment() {
   /* ================= RAZORPAY ================= */
   const handlePayment = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const user = auth.currentUser;
+      if (!user) {
+        navigate("/signin");
+        return;
+      }
 
+      const firebaseToken = await user.getIdToken();
+
+      // Create order
       const orderRes = await fetch(
         `${API_URL}/api/payment/create-order`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${firebaseToken}`,
           },
         }
       );
@@ -83,7 +90,7 @@ export default function Payment() {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${firebaseToken}`,
               },
               body: JSON.stringify(response),
             }
@@ -121,33 +128,57 @@ export default function Payment() {
 
   /* ================= PREMIUM DESIGN UI ================= */
   return (
-    <div className="payment-container" style={{ padding: "60px 20px", textAlign: "center" }}>
-      <h1>Unlock your professional brand kit</h1>
-      <p>
-        Get unlimited variations, full commercial rights, and files optimized
-        for every platform.
-      </p>
+    <div style={{ background: "#fdf7fb", minHeight: "100vh", padding: "60px 20px" }}>
+      <div style={{ maxWidth: "600px", margin: "0 auto", textAlign: "center" }}>
+        <h1 style={{ fontSize: "42px", marginBottom: "20px" }}>
+          Unlock your professional brand kit
+        </h1>
 
-      <div style={{ margin: "30px 0" }}>
-        <h2>Premium Access</h2>
-        <h1>₹299 / month</h1>
-        <p>Cancel anytime</p>
+        <p style={{ fontSize: "18px", color: "#555", marginBottom: "40px" }}>
+          Get unlimited variations, full commercial rights, and files optimized
+          for every platform.
+        </p>
+
+        <div style={{ textAlign: "left", marginBottom: "40px" }}>
+          <p>✔ Unlimited logo variations</p>
+          <p>✔ Full commercial license</p>
+          <p>✔ All file formats included (PNG, SVG, PDF)</p>
+        </div>
+
+        <div
+          style={{
+            border: "1px solid #f5c6d6",
+            borderRadius: "12px",
+            padding: "30px",
+            marginBottom: "30px",
+            background: "white",
+          }}
+        >
+          <h2>Premium Access</h2>
+          <h1 style={{ fontSize: "36px" }}>₹299 / month</h1>
+          <p>Cancel anytime</p>
+        </div>
+
+        <button
+          onClick={handlePayment}
+          style={{
+            width: "100%",
+            padding: "16px",
+            fontSize: "18px",
+            backgroundColor: "#ff4d94",
+            color: "white",
+            border: "none",
+            borderRadius: "10px",
+            cursor: "pointer",
+          }}
+        >
+          Create my first logo
+        </button>
+
+        <p style={{ marginTop: "15px", color: "#777" }}>
+          Secure payment • Cancel anytime
+        </p>
       </div>
-
-      <button
-        onClick={handlePayment}
-        style={{
-          padding: "14px 28px",
-          backgroundColor: "#ff4d94",
-          color: "white",
-          border: "none",
-          borderRadius: "8px",
-          fontSize: "18px",
-          cursor: "pointer",
-        }}
-      >
-        Pay ₹299
-      </button>
     </div>
   );
 }
