@@ -186,8 +186,7 @@ function App() {
           />
 
           {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-
+          <Route path="*" element={<div style={{ padding: 40 }}>Page Not Found</div>} />
         </Routes>
       </Suspense>
     </>
