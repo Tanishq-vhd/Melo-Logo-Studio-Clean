@@ -20,9 +20,9 @@ const generateToken = (user) => {
 ===================================== */
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, firebaseUid } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !firebaseUid) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -31,11 +31,11 @@ router.post("/signup", async (req, res) => {
       return res.status(409).json({ message: "Email already registered" });
     }
 
-    // ✅ Password will be hashed by User model (pre-save hook)
     const user = await User.create({
       name,
       email,
       password,
+      firebaseUid,
       isPremium: false,
     });
 
@@ -51,9 +51,10 @@ router.post("/signup", async (req, res) => {
         isPremium: user.isPremium,
       },
     });
+
   } catch (err) {
     console.error("Signup error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -73,7 +74,6 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // ✅ Use model method
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -91,9 +91,10 @@ router.post("/login", async (req, res) => {
         isPremium: user.isPremium,
       },
     });
+
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -102,20 +103,20 @@ router.post("/login", async (req, res) => {
 ===================================== */
 router.post("/google", async (req, res) => {
   try {
-    const { email, name, googleId } = req.body;
+    const { email, name, googleId, firebaseUid } = req.body;
 
-    if (!email || !googleId) {
+    if (!email || !firebaseUid) {
       return res.status(400).json({ message: "Google authentication failed" });
     }
 
     let user = await User.findOne({ email });
 
     if (!user) {
-      // ✅ googleId stored as password, hashed by model
       user = await User.create({
         name: name || "Google User",
         email,
-        password: googleId,
+        password: googleId || "google-auth",
+        firebaseUid,
         isPremium: false,
       });
     }
@@ -132,9 +133,10 @@ router.post("/google", async (req, res) => {
         isPremium: user.isPremium,
       },
     });
+
   } catch (err) {
     console.error("Google auth error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
 });
 

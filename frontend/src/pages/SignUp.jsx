@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signupUser } from "../services/api";
 import { auth } from "../firebase";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 import logo from "../assets/images/logo.jpg";
 
 export default function SignUp() {
@@ -28,18 +32,31 @@ export default function SignUp() {
     setError("");
 
     try {
-      const res = await signupUser(form);
+      // 1️⃣ Create user in Firebase
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
+
+      const firebaseUser = userCredential.user;
+
+      // 2️⃣ Send user data + firebaseUid to backend
+      const res = await signupUser({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        firebaseUid: firebaseUser.uid,
+      });
 
       if (res?.token) {
-        // 1. Save Token
         localStorage.setItem("token", res.token);
 
-        // 2. ✅ Initialize the user object with isPaid: false
-        // This ensures the RequirePayment wrapper in App.jsx works correctly
-        const userData = { 
-          email: res.user?.email || form.email, 
-          isPaid: false 
+        const userData = {
+          email: res.user?.email || form.email,
+          isPaid: false,
         };
+
         localStorage.setItem("user", JSON.stringify(userData));
 
         navigate("/payment");
@@ -47,7 +64,8 @@ export default function SignUp() {
         setError(res?.message || "Signup failed");
       }
     } catch (err) {
-      setError("Network error. Please try again.");
+      console.error("Signup error:", err);
+      setError(err?.response?.data?.message || err.message || "Signup failed");
     }
 
     setLoading(false);
@@ -64,22 +82,21 @@ export default function SignUp() {
 
       const user = result.user;
 
-      // Send user to backend to create account / login
       const res = await signupUser({
-        name: user.displayName,
+        name: user.displayName || "Google User",
         email: user.email,
-        password: user.uid, // simple approach
+        password: user.uid, // simple backend requirement
+        firebaseUid: user.uid,
       });
 
       if (res?.token) {
-        // 1. Save Token
         localStorage.setItem("token", res.token);
 
-        // 2. ✅ Initialize Google user object with isPaid: false
-        const userData = { 
-          email: user.email, 
-          isPaid: false 
+        const userData = {
+          email: user.email,
+          isPaid: false,
         };
+
         localStorage.setItem("user", JSON.stringify(userData));
 
         navigate("/payment");
@@ -88,7 +105,7 @@ export default function SignUp() {
       }
     } catch (error) {
       console.error("Google sign-in error:", error);
-      setError("Google sign-in failed");
+      setError(error?.response?.data?.message || error.message || "Google sign-in failed");
     }
 
     setLoading(false);
