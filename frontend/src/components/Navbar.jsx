@@ -30,7 +30,7 @@ export default function Navbar() {
         <nav className="nav-links">
           <NavLink to="/" end>Home</NavLink>
           <NavLink to="/melostudio">melostudio</NavLink>
-          <NavLink to="/Maxx">Maxx</NavLink>
+          <NavLink to="/maxx">Maxx</NavLink>
         </nav>
 
         <div className="auth-buttons">
