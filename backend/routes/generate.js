@@ -43,7 +43,7 @@ router.post("/image", authMiddleware, async (req, res) => {
     const results = await Promise.allSettled(
       prompts.map((p) =>
         openai.images.generate({
-          model: "gpt-image-1",
+          model: "dall-e-3",
           prompt: p,
           size: "1024x1024",
         })
@@ -61,10 +61,10 @@ router.post("/image", authMiddleware, async (req, res) => {
     return res.json({ images });
 
   } catch (err) {
-    console.error("OpenAI error:", err.message);
-    return res.status(500).json({
-      error: "Image generation failed",
-      message: err.message,
+    console.error("FULL OPENAI ERROR:", err);
+  return res.status(500).json({
+    error: err.message,
+    details: err.response?.data || null
     });
   }
 });
