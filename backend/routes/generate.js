@@ -43,7 +43,7 @@ router.post("/image", authMiddleware, async (req, res) => {
     const results = await Promise.allSettled(
       prompts.map((p) =>
         openai.images.generate({
-          model: "dall-e-3",
+          model: "gpt-image-1",
           prompt: p,
           size: "1024x1024",
         })
