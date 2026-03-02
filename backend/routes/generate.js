@@ -40,33 +40,31 @@ router.post("/image", authMiddleware, async (req, res) => {
       `${prompt}. Variation ${i + 1}. Clean vector logo, minimal background.`
     );
 
-    // 🔥 Use Promise.all so errors are NOT hidden
-    const results = await Promise.all(
+    const results = await Promise.allSettled(
       prompts.map((p) =>
         openai.images.generate({
-          model: "gpt-image-1",
+          model: "dall-e-3",
           prompt: p,
           size: "1024x1024",
         })
       )
     );
 
-    // Extract image URLs safely
-    const images = results.map((r) => {
-      if (!r.data || !r.data[0] || !r.data[0].url) {
-        throw new Error("Invalid image response from OpenAI");
-      }
-      return r.data[0].url;
-    });
+    const images = results
+      .filter((r) => r.status === "fulfilled")
+      .map((r) => r.value.data[0].url);
+
+    if (images.length === 0) {
+      return res.status(500).json({ error: "No images generated" });
+    }
 
     return res.json({ images });
 
   } catch (err) {
-    console.error("FULL OPENAI ERROR:", err);
-
+    console.error("OpenAI error:", err.message);
     return res.status(500).json({
-      error: err.message,
-      details: err.response?.data || null,
+      error: "Image generation failed",
+      details: err.message,
     });
   }
 });
@@ -119,4 +117,4 @@ router.post("/download-image", authMiddleware, async (req, res) => {
   }
 });
 
-export default router;
+export default router;  
