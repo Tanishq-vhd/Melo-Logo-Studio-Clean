@@ -64,7 +64,7 @@ router.post("/image", authMiddleware, async (req, res) => {
     console.error("OpenAI error:", err.message);
     return res.status(500).json({
       error: "Image generation failed",
-      details: err.message,
+      message: err.message,
     });
   }
 });
